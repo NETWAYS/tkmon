@@ -82,7 +82,6 @@ readGpgCfg in order to parse key ID and passphrase.
 
 =head1 METHODS 
 
-
 =head2 readGpgCfg
 
 Example:
@@ -141,12 +140,12 @@ config hash.
 
 =head1 DEPENDENCIES
 
-use warnings;
-use strict;
-use Carp;
-use Crypt::GPG;
-use Safe;
-use version;
+	use warnings;
+	use strict;
+	use Carp;
+	use Crypt::GPG;
+	use Safe;
+	use version;
 
 =head1 AUTHOR
 
