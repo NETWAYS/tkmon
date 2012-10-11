@@ -13,7 +13,7 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseHBXml parseHBHash getHBVersion); # symbols to export
+	@EXPORT = qw(parseXmlHash getHBVersion getHBAuthKey getHBDate); # symbols to export
 }
 
 our $HBROOTTAG = "heartbeat";
@@ -38,7 +38,7 @@ sub getHBAuthKey{
 
 sub getHBDate{
 	my $root = shift;
-	return $root->{date}->{value};
+	return $root->{heartbeat}->{date}->{value};
 }
 
 
