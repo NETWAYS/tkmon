@@ -5,7 +5,6 @@ use warnings;
 use strict;
 use Carp;
 use version;
-use XML::LibXML;
 use XML::Bare;
 
 our $VERSION = qv('0.0.1');
@@ -14,56 +13,32 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseHBXml parseHBHash); # symbols to export
+	@EXPORT = qw(parseHBXml parseHBHash getHBVersion); # symbols to export
 }
 
 our $HBROOTTAG = "heartbeat";
 our $AUTHKEYTAG = "authkey";
 
-sub getAtts{
-	my $node = shift;
-	my @atts = $node->attributes();
-	return \@atts;
-}
-
-sub parseNode{
-	my $node = shift;
-	my %node_h;
-	if($node->hasAttributes()){
-		$node_h{'attributes'} = getAtts($node);
-	}
-	$node_h{'name'} = $node->getLocalName();
-	$node_h{'text'} = $node->textContent();
-	
-	return \%node_h;
-}
-
-sub parseHBHash{
+sub parseXmlHash{
 	my $filename = shift;
 	my $xml = new XML::Bare( file => $filename );
 	my $root = $xml->parse();
-	
+	return $root;
 }
 
-sub parseHBXml{
-	my $filename = shift;
-	
-	my $parser = XML::LibXML->new();
-	my $doc = $parser->parse_file($filename);
-	my %hb_h;
-	
-	#grap a node list of heartbeats
-	my @hb_nlist = $doc->findnodes($HBROOTTAG);
-	if(scalar(@hb_nlist) != 1){
-		confess "Found more than one heartbeat root tag in xml!"
-	}
-	#get the content/childs of the node list
-	#we only have one hb tag
-	my @xml_l;
-	my @nodes = $hb_nlist[0]->nonBlankChildNodes();
-	foreach my $tag (@nodes){
-		push(@xml_l,parseNode($tag));
-	}
+sub getHBVersion{
+	my $root = shift;
+	return $root->{heartbeat}->{version}->{value};
+}
+
+sub getHBAuthKey{
+	my $root = shift;
+	return $root->{heartbeat}->{authkey};
+}
+
+sub getHBDate{
+	my $root = shift;
+	return $root->{date}->{value};
 }
 
 

@@ -4,5 +4,6 @@ use Alert::Handler::Xml;
 
 MAIN:{
 	
-	my $hbs = parseHBHash('HeartbeatTest.xml');
+	my $hb_h = parseHBHash('HeartbeatTest.xml');
+	print getHBVersion($hb_h);
 }
