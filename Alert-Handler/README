@@ -1,20 +1,5 @@
 Alert-Handler version 0.0.1
 
-[ REPLACE THIS...
-
-  The README is used to introduce the module and provide instructions on
-  how to install the module, any machine dependencies it may have (for
-  example C compilers and installed libraries) and any other information
-  that should be understood before the module is installed.
-
-  A README file is required for CPAN modules since CPAN extracts the
-  README file from a module distribution so that people browsing the
-  archive can use it get an idea of the modules uses. It is usually a
-  good idea to provide version information here so that people can
-  decide whether fixes for the module are worth downloading.
-]
-
-
 INSTALLATION
 
 To install this module, run the following commands:
@@ -24,10 +9,20 @@ To install this module, run the following commands:
 	make test
 	make install
 
-
 DEPENDENCIES
 
-None.
+	use warnings;
+	use strict;
+	use Carp;
+	use Safe;
+	use version;
+	use warnings;
+	use Crypt::GPG;
+	use WWW::Curl::Easy;
+	use XML::Bare;
+	
+On debian based systems install
+	libcrypt-gpg-perl libwww-curl-perl libxml-bare-perl
 
 
 COPYRIGHT AND LICENCE

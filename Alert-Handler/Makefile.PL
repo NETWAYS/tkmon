@@ -13,6 +13,8 @@ WriteMakefile(
         'version'    => 0,
         'Crypt::GPG' => 0,
         'Safe' => 0,
+        'WWW::Curl::Easy' => 0,
+        'XML::Bare' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Alert-Handler-*' },
