@@ -23,7 +23,7 @@ DEPENDENCIES
 	
 On debian based systems install
 	libcrypt-gpg-perl libwww-curl-perl libxml-bare-perl
-
+	libemail-simple-perl
 
 COPYRIGHT AND LICENCE
 

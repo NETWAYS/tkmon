@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 2;
+use Test::More tests => 4;
 
 use Alert::Handler::Email;
 
-my $email = 'Return-Path: gschoenberger@thomas-krenn.com
+my $email_str = 'Return-Path: gschoenberger@thomas-krenn.com
 Received: from zimbra.thomas-krenn.com (LHLO zimbra.thomas-krenn.com)
  (127.0.1.1) by zimbra.thomas-krenn.com with LMTP; Mon, 5 Nov 2012 15:08:10
  +0100 (CET)
@@ -38,7 +38,11 @@ X-Mailer: Zimbra 7.2.0_GA_2669 (ZimbraWebClient - FF3.0 (Linux)/7.2.0_GA_2669)
 
 The quick brown fox jumps over the lazy dog.';
 
+#this returns an email object from Email::Simple
+my $email = parseEmailStr($email_str);
+
 is(getSubject($email), 'TK-Monitoring Test E-Mail');
 my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
 is(getSubject($modifiedEmail), 'TK-Monitoring modified Subject');
-
+is(getBody($email), 'The quick brown fox jumps over the lazy dog.');
+is(getBody($modifiedEmail), 'The quick brown fox jumps over the lazy dog.');

@@ -11,32 +11,51 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(valAuthKey); # symbols to export
+	@EXPORT = qw(parseEmailStr getSubject replaceSubject getBody toString); # symbols to export
 }
 
-
-# Module implementation here
-sub replaceSubject{
+sub parseEmailStr{
 	my $msg_str = shift;
-	my $newSubj = shift;
 	
 	#check if msg string is empty
 	if($msg_str eq "" || !defined($msg_str)){
 		confess "Cannot parse an empty email message string.";
 	}
-	
 	my $msg = Email::Simple->new($msg_str);
-	$msg->header_set("Subject", $newSubj);
-	return $msg->as_string();
+	return $msg;
 }
 
+sub getSubject{
+	my $msg = shift;
+	return $msg->header("Subject");
+}
+
+sub getBody{
+	my $msg = shift;
+	return $msg->body;
+}
+
+sub replaceSubject{
+	my $msg = shift;
+	my $newSubj = shift;
+	
+	#copy the original one
+	my $modMsg = Email::Simple->new($msg->as_string());
+	$modMsg->header_set("Subject", $newSubj);
+	return $modMsg;
+}
+
+sub toString{
+	my $msg = shift;
+	return $msg->as_string();
+}
 
 1; # Magic true value required at end of module
 __END__
 
 =head1 NAME
 
-Alert::Handler::Email - [One line description of module's purpose here]
+Alert::Handler::Email - Parse and modify email messages.
 
 
 =head1 VERSION

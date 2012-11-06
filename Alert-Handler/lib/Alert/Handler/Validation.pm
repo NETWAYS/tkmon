@@ -51,7 +51,7 @@ __END__
 
 =head1 NAME
 
-Alert::Handler::Validation - Validate Alerts/Serials via REST API
+Alert::Handler::Validation - Validate heartbeats/serials via REST API
 
 =head1 VERSION
 

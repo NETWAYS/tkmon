@@ -13,15 +13,22 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseXmlHash getHBVersion getHBAuthKey getHBDate); # symbols to export
+	@EXPORT = qw(parseXmlFile parseXmlText getHBVersion getHBAuthKey getHBDate); # symbols to export
 }
 
 our $HBROOTTAG = "heartbeat";
 our $AUTHKEYTAG = "authkey";
 
-sub parseXmlHash{
+sub parseXmlFile{
 	my $filename = shift;
 	my $xml = new XML::Bare( file => $filename );
+	my $root = $xml->parse();
+	return $root;
+}
+
+sub parseXmlText{
+	my $xml_str = shift;
+	my $xml = new XML::Bare( text => $xml_str );
 	my $root = $xml->parse();
 	return $root;
 }
@@ -48,11 +55,11 @@ __END__
 
 =head1 NAME
 
-Alert::Handler::Crypto - Encrypt and decrypt strings with a gpg key.
+Alert::Handler::Xml - Parse the xml alert emails.
 
 =head1 VERSION
 
-This document describes Alert::Handler::Crypto version 0.0.1
+This document describes Alert::Handler::Xml version 0.0.1
 
 =head1 SYNOPSIS
 
