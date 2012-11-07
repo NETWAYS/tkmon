@@ -1,6 +1,5 @@
 package Alert::Handler::Xml;
 
-
 use warnings;
 use strict;
 use Carp;
@@ -22,14 +21,20 @@ our $AUTHKEYTAG = "authkey";
 sub parseXmlFile{
 	my $filename = shift;
 	my $xml = new XML::Bare( file => $filename );
-	my $root = $xml->parse();
+	my $root = eval {$xml->parse()};
+	if($@){
+		undef $root;
+	}
 	return $root;
 }
 
 sub parseXmlText{
 	my $xml_str = shift;
 	my $xml = new XML::Bare( text => $xml_str );
-	my $root = $xml->parse();
+	my $root = eval {$xml->parse()};
+	if($@){
+		undef $root;
+	}
 	return $root;
 }
 
@@ -99,6 +104,7 @@ The given config did not contain the right parameter.
 
 =head1 DEPENDENCIES
 use XML::LibXML;
+use Log::Dispatch;
 
 
 =head1 AUTHOR

@@ -20,10 +20,12 @@ DEPENDENCIES
 	use Crypt::GPG;
 	use WWW::Curl::Easy;
 	use XML::Bare;
+	use Email::Simple;
+	use Config::IniFiles;
 	
 On debian based systems install
 	libcrypt-gpg-perl libwww-curl-perl libxml-bare-perl
-	libemail-simple-perl
+	libemail-simple-perl liblog-dispatch-perl libdbi-perl libconfig-inifiles-perl
 
 COPYRIGHT AND LICENCE
 

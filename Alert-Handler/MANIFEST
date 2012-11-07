@@ -3,6 +3,7 @@ lib/Alert/Handler/Crypto.pm
 lib/Alert/Handler/Xml.pm
 lib/Alert/Handler/Validation.pm
 lib/Alert/Handler/Email.pm
+lib/Alert/Handler/Dbase.pm
 Makefile.PL
 MANIFEST			This list of files
 README
@@ -10,3 +11,5 @@ t/00.load.t
 t/crypto.t
 t/xml.t
 t/validation.t
+t/email.t
+t/dbase.t

@@ -15,6 +15,8 @@ WriteMakefile(
         'Safe' => 0,
         'WWW::Curl::Easy' => 0,
         'XML::Bare' => 0,
+        'Email::Simple' => 0,
+        'Log::Dispatch' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Alert-Handler-*' },
