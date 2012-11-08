@@ -23,7 +23,7 @@ sub parseXmlFile{
 	my $xml = new XML::Bare( file => $filename );
 	my $root = eval {$xml->parse()};
 	if($@){
-		undef $root;
+		confess "Could not parse XML file."
 	}
 	return $root;
 }
@@ -33,7 +33,7 @@ sub parseXmlText{
 	my $xml = new XML::Bare( text => $xml_str );
 	my $root = eval {$xml->parse()};
 	if($@){
-		undef $root;
+		confess "Could not parse XML string."
 	}
 	return $root;
 }
@@ -53,14 +53,12 @@ sub getHBDate{
 	return $root->{heartbeat}->{date}->{value};
 }
 
-
-
 1; # Magic true value required at end of module
 __END__
 
 =head1 NAME
 
-Alert::Handler::Xml - Parse the xml alert emails.
+Alert::Handler::Xml - Parse TK monitoring xml files.
 
 =head1 VERSION
 
@@ -70,42 +68,80 @@ This document describes Alert::Handler::Xml version 0.0.1
 
 Example:
 
+	my $hb_h = parseXmlFile('HeartbeatTest.xml');
+	print getHBVersion($hb_h)."\n";
+	print getHBDate($hb_h)."\n";
+	my $authKey = getHBAuthKey($hb_h);
 
-  
 =head1 DESCRIPTION
 
-
+Alert::Handler::Xml parses the defined xml structures. The module is able
+to handle valid heartbeat and alert xmls.
 
 =head1 METHODS 
 
-
-=head2 readGpgCfg
+=head2 parseXmlFile
 
 Example:
 
+	my $hb_h = parseXmlFile('HeartbeatTest.xml');
 	
+Parses the xml file, only one parameter is needed - the file path. Returns
+a multi-level hash containing the xml structure.
+
+=head2 parseXmlText
+
+Example:
+
+	my $hb_h = parseXmlText($xml_str);
+	
+Parses the given xml string. Returns a multi-level hash containing the xml structure.
+
+=head2 getHBVersion
+
+Example:
+
+	print getHBVersion($hb_h);
+	
+Returns the version tag of the heartbeat xml.
+
+=head2 getHBAuthKey
+
+Example:
+
+	print getHBAuthKey($hb_h);
+	
+Returns the authkey tag of the heartbeat xml.
+
+=head2 getHBDate
+
+Example:
+
+	print getHBAuthKey($hb_h);
+	
+Returns the date tag (timestamp) of the heartbeat xml.
+
 =head1 DIAGNOSTICS
 
 =over
 
-=item C<< Could not read gpg config. >>
+=item C<< Could not parse XML file. >>
 
-The given config file could not be read by readGpgCfg.
+The given xml file could not be parsed by parseXmlFile.
 
-=item C<< Gpg config does not contain the right parameters.. >>
+=item C<< Could not parse XML string. >>
 
-The given config did not contain the right parameter.
+The given xml string could not be parsed by parseXmlText.
  
 =back
 
-=head1 CONFIGURATION AND ENVIRONMENT
-
-
-
 =head1 DEPENDENCIES
-use XML::LibXML;
-use Log::Dispatch;
 
+	use warnings;
+	use strict;
+	use Carp;
+	use version;
+	use XML::Bare;
 
 =head1 AUTHOR
 

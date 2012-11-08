@@ -70,7 +70,8 @@ Alert::Handler::Validation calls two different REST APIs - one for
 alert heartbeats and one for serial numbers. Both APIs require a
 valid auth key to return 200 on success. Else 403 as an invalidation
 notice is returned. In order to check an auth/serial combination a
-valid serial number must be provided as a second argument.
+valid serial number must be provided as a second argument. If the monitoring
+service has not been bought by the customer 402 is returned.
 
 =head1 METHODS 
 

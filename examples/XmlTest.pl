@@ -5,7 +5,7 @@ use Alert::Handler::Validation;
 
 MAIN:{
 	
-	my $hb_h = parseXmlHash('HeartbeatTest.xml');
+	my $hb_h = parseXmlFile('HeartbeatTest.xml');
 	print getHBVersion($hb_h)."\n";
 	print getHBDate($hb_h)."\n";
 	my $authKey = getHBAuthKey($hb_h);

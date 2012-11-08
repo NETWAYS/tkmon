@@ -2,10 +2,10 @@ use Alert::Handler::Dbase;
 use feature qw(say);
 
 MAIN:{
-	my $mysqlCfg = readMysqlCfg("../mysql/MysqlConfig.cfg");
+	my $mysqlCfg = readMysqlCfg('../mysql/MysqlConfig.cfg','heartbeats');
 	
-	say $mysqlCfg->{'heartbeats'}{'host'};
-	say $mysqlCfg->{'heartbeats'}{'db'};
-	say $mysqlCfg->{'heartbeats'}{'user'};
+	say $mysqlCfg->{'host'};
+	say $mysqlCfg->{'db'};
+	say $mysqlCfg->{'user'};
 	
 }
