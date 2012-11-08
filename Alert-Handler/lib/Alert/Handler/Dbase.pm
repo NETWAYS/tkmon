@@ -17,9 +17,14 @@ BEGIN {
 
 sub readMysqlCfg{
 	my $cfgPath = shift;
+	my $section = shift;
+	if(!defined($cfgPath) || !defined($section)){
+		confess "Cannot use empty config path or empty section."
+	}
 	my %mysqlCfg;
 	tie %mysqlCfg, 'Config::IniFiles', (-file => $cfgPath);
-	return \%mysqlCfg;
+	my %section =  %{$mysqlCfg{$section}};
+	return \%section;
 }
 
 

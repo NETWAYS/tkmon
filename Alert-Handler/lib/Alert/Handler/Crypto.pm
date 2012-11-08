@@ -21,9 +21,9 @@ sub readGpgCfg{
 	if(ref($gpgCfg) ne "HASH"){
 		confess "Could not read gpg config.";
 	}
-	if(not exists $gpgCfg->{'gpgbin'} ||
-	not exists $gpgCfg->{'secretkey'} ||
-	not exists $gpgCfg->{'passphrase'}){
+	if(!(exists $gpgCfg->{'gpgbin'}) ||
+	!(exists $gpgCfg->{'secretkey'}) ||
+	!(exists $gpgCfg->{'passphrase'})){
 		confess "Gpg config does not contain the right parameters.";
 	}
 	return $gpgCfg;
@@ -34,8 +34,7 @@ sub encrypt{
 	my $recipient = shift;
 	
 	#check if params are empty
-	if($plaintext eq "" || !defined($plaintext) || 
-	$recipient eq "" || !defined($recipient)){
+	if(!defined($plaintext) || !defined($recipient)){
 		confess "Cannot encrypt empty plaintext or for empty recipient.";
 	}
 	my $gpg = new Crypt::GPG;
@@ -49,7 +48,7 @@ sub encrypt{
 sub decrypt{
 	my $encrypted = shift;
 	my $config_h = shift;
-	if($encrypted eq "" || !defined($encrypted) || !defined($config_h)){
+	if(!defined($encrypted) || !defined($config_h)){
 		confess "Cannot decrypt empty plaintext or use undefined config hash.";
 	}
 	my $gpg = new Crypt::GPG;
