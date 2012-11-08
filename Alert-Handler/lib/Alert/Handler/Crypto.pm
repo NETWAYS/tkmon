@@ -1,6 +1,5 @@
 package Alert::Handler::Crypto;
 
-
 use warnings;
 use strict;
 use Carp;
@@ -34,21 +33,34 @@ sub encrypt{
 	my $plaintext = shift;
 	my $recipient = shift;
 	
+	#check if params are empty
+	if($plaintext eq "" || !defined($plaintext) || 
+	$recipient eq "" || !defined($recipient)){
+		confess "Cannot encrypt empty plaintext or for empty recipient.";
+	}
 	my $gpg = new Crypt::GPG;
-	my $encrypted = $gpg->encrypt($plaintext,$recipient);
+	my $encrypted = eval{$gpg->encrypt($plaintext,$recipient)};
+	if($@){
+		confess "Error while encryptiong with GPG.";
+	}
 	return $encrypted;
 }
 
 sub decrypt{
 	my $encrypted = shift;
 	my $config_h = shift;
-	
+	if($encrypted eq "" || !defined($encrypted) || !defined($config_h)){
+		confess "Cannot decrypt empty plaintext or use undefined config hash.";
+	}
 	my $gpg = new Crypt::GPG;
 	$gpg->gpgbin($config_h->{'gpgbin'});      # The GnuPG executable.
 	$gpg->secretkey($config_h->{'secretkey'});     # Set ID of default secret key.
 	$gpg->passphrase($config_h->{'passphrase'});  # Set passphrase.
 
-	my $decrypted = $gpg->verify($encrypted);
+	my $decrypted = eval{$gpg->verify($encrypted)};
+	if($@){
+		confess "Error while decryptiong with GPG.";
+	}
 	return $decrypted;
 }
 
@@ -75,7 +87,7 @@ Example:
 =head1 DESCRIPTION
 
 Alert::Handler::Crypto interacts with an imported gpg key and provides
-methosd to en- and decrypt message strings with the configured key. The
+methods to en- and decrypt message strings with the configured key. The
 key that is used for en-/decryption is specified in a config file. Before
 any cipher method can be called this config file must be read out with
 readGpgCfg in order to parse key ID and passphrase.
@@ -125,10 +137,27 @@ returned by readGpgCfg.
 
 The given config file could not be read by readGpgCfg.
 
-=item C<< Gpg config does not contain the right parameters.. >>
+=item C<< Gpg config does not contain the right parameters. >>
 
 The given config did not contain the right parameter.
- 
+
+=item C<< Cannot encrypt empty plaintext or for empty recipient. >>
+
+The encrypt function got an empty plaintext string or the gpg recipient is empty.
+
+=item C<< Error while encryptiong with GPG. >>
+
+The call to 'Crypt::GPG::encrypt' failed.
+
+=item C<< Cannot decrypt empty plaintext or use undefined config hash. >>
+
+The decrypt function got an empty ciphertext string or the config hash does not contain
+the correct parameters.
+
+=item C<< Error while decryptiong with GPG. >>
+
+The call to 'Crypt::GPG::decrypt' failed.
+
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
