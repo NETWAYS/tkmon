@@ -6,13 +6,13 @@ use Carp;
 use DBI;
 use Config::IniFiles;
 use version;
-our $VERSION = qv('0.0.1');
 
+our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(readMysqlCfg); # symbols to export
+	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -22,132 +22,274 @@ sub readMysqlCfg{
 		confess "Cannot use empty config path or empty section."
 	}
 	my %mysqlCfg;
-	tie %mysqlCfg, 'Config::IniFiles', (-file => $cfgPath);
+	eval{
+		tie %mysqlCfg, 'Config::IniFiles', (-file => $cfgPath);
+	};
+	if($@){
+		confess "Could not read mysql config";
+	}
 	my %section =  %{$mysqlCfg{$section}};
 	return \%section;
 }
 
+sub getConnection{
+	my $mysqlCfg = shift;
+	if(!defined($mysqlCfg)){
+		confess "Cannot use undefined mysql config.";
+	}
+	my $DB = DBI->connect("DBI:mysql:".$mysqlCfg->{db}.";host=".$mysqlCfg->{host},
+			$mysqlCfg->{user}, $mysqlCfg->{pwd}) ||
+			die "Could not connect to database: $DBI::errstr";
+	return $DB;
+}
 
+sub closeConnection{
+	my $DB = shift;
+	if(!defined($DB)){
+		carp "Cannot close undefined mysql connection.";
+	}
+	else{
+		$DB->disconnect;
+	}
+}
+
+sub insertHB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+	my $HBDate = shift;
+	
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	if(!defined($HBVersion) ||
+		!defined($HBAuthkey) ||
+		!defined($HBDate)){
+			confess "Cannot insert empty HB values to database.";
+		}
+	my $sth = $DB->prepare( "
+			Insert INTO $DBTable
+			(Version, Authkey, Date)
+			VALUES (?, ?, ?)" );
+	my $rv = $sth->execute($HBVersion,$HBAuthkey,$HBDate);
+	if($rv != 1){
+		confess "Affected rows for inseting HB returned wrong count.";
+	}
+}
+
+sub HBIsDuplicate{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+	my $HBDate = shift;
+	
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	if(!defined($HBVersion) ||
+		!defined($HBAuthkey) ||
+		!defined($HBDate)){
+			confess "Cannot select empty HB values from database.";
+		}
+	my $sth = $DB->prepare( "
+			SELECT Date
+			FROM $DBTable
+			WHERE Version = ?
+			AND Authkey = ?" );
+	my $rv = $sth->execute($HBVersion,$HBAuthkey);
+	#mor than 1 HB - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		croak "Warning: Already a duplicate HB in DB."
+	}
+	my $fetchedDate;
+	# Bind Perl variables to columns:
+	$rv = $sth->bind_columns(\$fetchedDate);
+	$sth->fetch;
+	
+	#we have found a duplicate
+	if($fetchedDate eq $HBDate){
+		return 1;
+	}
+	else{
+		return 0;
+	}
+}
 
 1; # Magic true value required at end of module
 __END__
 
 =head1 NAME
 
-Alert::Handler::Dbase - Access mysql databases.
+Alert::Handler::Dbase - Access mysql databases and work with Heartbeats and Alerts
 
 
 =head1 VERSION
 
 This document describes Alert::Handler::Dbase version 0.0.1
 
-
 =head1 SYNOPSIS
 
-    use Alert::Handler::Dbase;
+Example
 
-=for author to fill in:
-    Brief code example(s) here showing commonest usage(s).
-    This section will be as far as many users bother reading
-    so make it as educational and exeplary as possible.
-  
+	use Alert::Handler::Dbase;
+	use Alert::Handler::Converters;
+	my $mysqlCfg = readMysqlCfg('../mysql/MysqlConfig.cfg','heartbeats');
+	my $DBCon = getConnection($mysqlCfg);
+	insertHB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
+	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))){
+		say "Found a duplicate: 0123456789a";
+	}
+	closeConnection($DBCon);
   
 =head1 DESCRIPTION
 
-=for author to fill in:
-    Write a full description of the module and its features here.
-    Use subsections (=head2, =head3) as appropriate.
+Alert::Handler::Dbase connects to a mysql database. The module is able to
+insert and check Heartbeats and Alerts. In order to use the correct data format
+for inserts the module Alert::Handler::Converters is usable.
 
+=head1 METHODS 
 
-=head1 INTERFACE 
+=head2 readMysqlCfg
 
-=for author to fill in:
-    Write a separate section listing the public components of the modules
-    interface. These normally consist of either subroutines that may be
-    exported, or methods that may be called on objects belonging to the
-    classes provided by the module.
+Example:
 
+	my $mysqlCfg = readMysqlCfg('../mysql/MysqlConfig.cfg','heartbeats');
+
+Parses a mysql config file, see Config::IniFiles for config format. The second parameter 
+is the corresponding section in the ini file that should be read out.
+The function returns a hash containing the config parameters.
+
+Example Config:
+	[alerts]
+	host = 192.168.56.101
+	db = tk_monitoring
+	table = Alerts
+	user = root
+	pwd = TOBEDEFINED
+
+=head2 getConnection
+
+Example:
+
+	my $DBCon = getConnection($mysqlCfg);
+
+Calls the DBI connect function and tries to connect to the mysql server. The host,
+database, user and password must be specified in the config file which must be read by
+readMysqlCfg before calling getConnection.
+On Success returns a valid database handle else raises an error.
+
+=head2 closeConnection
+
+Example:
+
+	closeConnection($DBCon);
+
+Closes an open database connection by the given handle.
+
+=head2 insertHB
+
+Example:
+
+	insertHB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
+
+Inserts a new heartbeat into the given table. The database is specified by a valid
+database handle. Parameters: Database handle, Database table, HB version, HB authkey, HB date
+Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
+
+=head2 HBIsDuplicate
+
+Example:
+
+	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))){
+		say "Found a duplicate: 0123456789a";
+	}
+
+Checks if the given heartbeat (version, authkey, date) is already in the database.table. If yes '1' is
+returned signaling true, else '0' signaling false.
 
 =head1 DIAGNOSTICS
 
-=for author to fill in:
-    List every single error and warning message that the module can
-    generate (even the ones that will "never happen"), with a full
-    explanation of each problem, one or more likely causes, and any
-    suggested remedies.
-
 =over
 
-=item C<< Error message here, perhaps with %s placeholders >>
+=item C<< Cannot use empty config path or empty section. >>
 
-[Description of error here]
+The given path or section in readMysqlCfg is empty.
 
-=item C<< Another error message here >>
+=item C<< Could not read mysql config. >>
 
-[Description of error here]
+Reading the config file with Config::IniFiles in readMysqlCfg returned an error.
 
-[Et cetera, et cetera]
+=item C<< Cannot use undefined mysql config. >>
+
+The config reference in getConnection is undefined.
+
+=item C<< Could not connect to database: $DBI::errstr >>
+
+The DBI connect function in getConnection returned an error.
+
+=item C<< Cannot close undefined mysql connection. >>
+
+The DB handle in closeConnection is undefined.
+
+=item C<< Cannot use undefined database table. >>
+
+The specified database table is undefined.
+
+=item C<< Cannot use undefined database handle. >>
+
+The specified database handle is undefined.
+
+=item C<< Affected rows for inseting HB returned wrong count. >>
+
+Inserting a heartbeat should only affect 1 row, this error signals
+that the INSERT affected rows != 1.
+
+=item C<< Warning: Already a duplicate HB in DB. >>
+
+Checking for a duplicat heartbeat should return only 1 entry
+when carrying out a SELECT. If SELECT returns more than one entry
+than there is already a duplicate in the database.
+
+=item C<< Cannot insert empty HB values to database. >>
+
+One of the given parameters (version, authkey, date) for inserting
+is undefined.
+
+=item C<< Cannot select empty HB values from database. >>
+
+One of the given parameters (version, authkey, date) for selecting
+from the database is undefined.
 
 =back
 
-
 =head1 CONFIGURATION AND ENVIRONMENT
 
-=for author to fill in:
-    A full explanation of any configuration system(s) used by the
-    module, including the names and locations of any configuration
-    files, and the meaning of any environment variables or properties
-    that can be set. These descriptions must also include details of any
-    configuration language used.
-  
-Alert::Handler::Dbase requires no configuration files or environment variables.
-
+Alert::Handler::Dbase requires one configuration file to
+specify how to connect to the mysql server. Also the desired table
+is specified in this file. A call to readMysqlCfg needs the
+path to this file in order to parse the file and init the 
+config hash.
 
 =head1 DEPENDENCIES
 
-=for author to fill in:
-    A list of all the other modules that this module relies upon,
-    including any restrictions on versions, and an indication whether
-    the module is part of the standard Perl distribution, part of the
-    module's distribution, or must be installed separately. ]
-
-None.
-
-
-=head1 INCOMPATIBILITIES
-
-=for author to fill in:
-    A list of any modules that this module cannot be used in conjunction
-    with. This may be due to name conflicts in the interface, or
-    competition for system or program resources, or due to internal
-    limitations of Perl (for example, many modules that use source code
-    filters are mutually incompatible).
-
-None reported.
-
-
-=head1 BUGS AND LIMITATIONS
-
-=for author to fill in:
-    A list of known problems with the module, together with some
-    indication Whether they are likely to be fixed in an upcoming
-    release. Also a list of restrictions on the features the module
-    does provide: data types that cannot be handled, performance issues
-    and the circumstances in which they may arise, practical
-    limitations on the size of data sets, special cases that are not
-    (yet) handled, etc.
-
-No bugs have been reported.
-
-Please report any bugs or feature requests to
-C<bug-alert-handler-dbase@rt.cpan.org>, or through the web interface at
-L<http://rt.cpan.org>.
-
+	use warnings;
+	use strict;
+	use Carp;
+	use DBI;
+	use Config::IniFiles;
+	use version;
 
 =head1 AUTHOR
 
 Georg Schönberger  C<< <gschoenberger@thomas-krenn.com> >>
-
 
 =head1 LICENCE AND COPYRIGHT
 
@@ -155,7 +297,6 @@ Copyright (c) 2012, Georg Schönberger C<< <gschoenberger@thomas-krenn.com> >>. 
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
-
 
 =head1 DISCLAIMER OF WARRANTY
 
