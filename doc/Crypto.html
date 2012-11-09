@@ -1,0 +1,229 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::Crypto</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS 
+
+</A><UL>
+<LI><A HREF="#readGpgCfg">readGpgCfg
+
+</A><LI><A HREF="#encrypt">encrypt
+
+</A><LI><A HREF="#decrypt">decrypt
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::Crypto - Encrypt and decrypt strings with a gpg key.
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::Crypto version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example:
+
+</P>
+<PRE>	use Alert::Handler::Crypto;
+	my $config = readGpgCfg('../gnupg/GpgConfig.cfg');
+	my $encrypted = encrypt($plaintext,'tktest@example.com');
+	my $decrypted = decrypt($encrypted,$config);</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert::Handler::Crypto interacts with an imported gpg key and provides
+methods to en- and decrypt message strings with the configured key. The
+key that is used for en-/decryption is specified in a config file. Before
+any cipher method can be called this config file must be read out with
+readGpgCfg in order to parse key ID and passphrase.
+
+</P><H1><A NAME="METHODS">METHODS 
+
+</A></H1>
+<H2><A NAME="readGpgCfg">readGpgCfg
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $config = readGpgCfg('../gnupg/GpgConfig.cfg');</PRE>
+
+<P>Reads a config file with the gpg config parameters in it. Returns a hash
+of the read parameters.
+
+</P>
+<P>Example config file:
+
+</P>
+<PRE>	{
+	gpgbin =&gt; '/usr/bin/gpg',
+	secretkey =&gt; '0x9B6B1E58',
+	passphrase =&gt; 'tktest',
+	}</PRE>
+<H2><A NAME="encrypt">encrypt
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $encrypted = encrypt($plaintext,'tktest@example.com');</PRE>
+
+<P>Encrpyts the string in $plaintext for the given email as a second argument.
+The public key of the given email must be present as imported gpg key.
+
+</P><H2><A NAME="decrypt">decrypt
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $decrypted = decrypt($encrypted,$config);</PRE>
+
+<P>Decrypts the ciphertext given by $encrypted. The $config is a valid config hash
+returned by readGpgCfg.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Could%20not%20read%20gpg%20config."><CODE>Could not read gpg config.</CODE>
+
+</A></DT>
+<DD>
+The given config file could not be read by readGpgCfg.
+
+</DD>
+<DT><A NAME="Gpg%20config%20does%20not%20contain%20the%20right%20parameters."><CODE>Gpg config does not contain the right parameters.</CODE>
+
+</A></DT>
+<DD>
+The given config did not contain the right parameter.
+
+</DD>
+<DT><A NAME="Cannot%20encrypt%20empty%20plaintext%20or%20for%20empty%20recipient."><CODE>Cannot encrypt empty plaintext or for empty recipient.</CODE>
+
+</A></DT>
+<DD>
+The encrypt function got an empty plaintext string or the gpg recipient is empty.
+
+</DD>
+<DT><A NAME="Error%20while%20encryptiong%20with%20GPG."><CODE>Error while encryptiong with GPG.</CODE>
+
+</A></DT>
+<DD>
+The call to 'Crypt::GPG::encrypt' failed.
+
+</DD>
+<DT><A NAME="Cannot%20decrypt%20empty%20plaintext%20or%20use%20undefined%20config%20hash."><CODE>Cannot decrypt empty plaintext or use undefined config hash.</CODE>
+
+</A></DT>
+<DD>
+The decrypt function got an empty ciphertext string or the config hash does not contain
+the correct parameters.
+
+</DD>
+<DT><A NAME="Error%20while%20decryptiong%20with%20GPG."><CODE>Error while decryptiong with GPG.</CODE>
+
+</A></DT>
+<DD>
+The call to 'Crypt::GPG::decrypt' failed.
+
+</DD>
+</DL>
+<H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A></H1>
+
+<P>Alert::Handler::Crypto requires one configuration file to
+specify which gpg key to use. A call to readGpgCfg needs the
+path to this file in order to parse the file and init the 
+config hash.
+
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use Crypt::GPG;
+	use Safe;
+	use version;</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+</P>
+</BODY>
+</HTML>
