@@ -12,7 +12,7 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate); # symbols to export
+	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate updateHBDate); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -105,23 +105,55 @@ sub HBIsDuplicate{
 			WHERE Version = ?
 			AND Authkey = ?" );
 	my $rv = $sth->execute($HBVersion,$HBAuthkey);
-	#mor than 1 HB - duplicate checking has not worked correctly 
-	if($sth->rows != 1){
-		croak "Warning: Already a duplicate HB in DB."
-	}
-	my $fetchedDate;
-	# Bind Perl variables to columns:
-	$rv = $sth->bind_columns(\$fetchedDate);
-	$sth->fetch;
 	
-	#we have found a duplicate
-	if($fetchedDate eq $HBDate){
-		return 1;
-	}
-	else{
+	#the heartbeat is not in the table yet
+	if($sth->rows == 0){
 		return 0;
 	}
+	#mor than 1 HB - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		croak "Warning: Already a duplicate HB in DB.";
+	}
+	#now check if date differs
+	my $fetchedDate;
+	$rv = $sth->bind_columns(\$fetchedDate);
+	$sth->fetch;
+	#HB is in table, timestamp differs from given
+	if($fetchedDate ne $HBDate){
+		return 1;
+	}
+	#HB is in table, with same timestamp, this should rather be rare
+	if($fetchedDate eq $HBDate){
+		return -1;
+	}
 }
+
+sub updateHBDate{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $newDate = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+	
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			UPDATE $DBTable
+			SET Date = ?
+			WHERE Version = ?
+			AND Authkey = ?" );
+	my $rv = $sth->execute($newDate,$HBVersion,$HBAuthkey);
+	if($rv != 1){
+		confess "Affected rows for updating HB Date returned wrong count.";
+	}
+}
+
+
+
 
 1; # Magic true value required at end of module
 __END__
@@ -215,6 +247,12 @@ Example:
 Checks if the given heartbeat (version, authkey, date) is already in the database.table. If yes '1' is
 returned signaling true, else '0' signaling false.
 
+=head2 updateHBDate
+
+Example:
+
+Updates the DATETIME column of a given heartbeat.
+
 =head1 DIAGNOSTICS
 
 =over
@@ -267,6 +305,10 @@ is undefined.
 
 One of the given parameters (version, authkey, date) for selecting
 from the database is undefined.
+
+=item C<< Affected rows for updating HB Date returned wrong count. >>
+
+Updating a hearbeat date must update only one row.
 
 =back
 
