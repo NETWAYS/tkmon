@@ -10,7 +10,7 @@ MAIN:{
 		my $config = readGpgCfg('../gnupg/GpgConfig.cfg');
 	} catch{
 		say "Reading config died with: @_";
-	}
+	};
 	#my $encrypted;
 	#while (<FILE>){
  	#	$encrypted .= $_;
