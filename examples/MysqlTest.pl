@@ -23,11 +23,12 @@ MAIN:{
 	try{
 		#insertHB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
 		if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
-			"0.1-dev","0123456789a",strToMysqlTime("Fri Nov 09 14:44:34 2012")) == 1){
+			"0.1-dev","0123456789a",strToMysqlTime("Fri Nov 09 20:58:34 2012")) == 1){
 			say "Found a duplicate: 0123456789a";
 			updateHBDate($DBCon,$mysqlCfg->{'table'},
-			strToMysqlTime("Fri Nov 09 14:44:34 2012"),"0.1-dev","0123456789a");
+			strToMysqlTime("Fri Nov 09 20:58:34 2012"),"0.1-dev","0123456789a");
 		};
+		say "Fetched date from DB: ".getHBDate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a");
 	} catch{
 		die "Failed with: $_";
 	} finally{

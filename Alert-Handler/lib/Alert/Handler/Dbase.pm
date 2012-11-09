@@ -5,6 +5,7 @@ use strict;
 use Carp;
 use DBI;
 use Config::IniFiles;
+use Try::Tiny;
 use version;
 
 our $VERSION = qv('0.0.1');
@@ -12,7 +13,8 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate updateHBDate); # symbols to export
+	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
+	updateHBDate getHBDate); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -99,25 +101,16 @@ sub HBIsDuplicate{
 		!defined($HBDate)){
 			confess "Cannot select empty HB values from database.";
 		}
-	my $sth = $DB->prepare( "
-			SELECT Date
-			FROM $DBTable
-			WHERE Version = ?
-			AND Authkey = ?" );
-	my $rv = $sth->execute($HBVersion,$HBAuthkey);
-	
-	#the heartbeat is not in the table yet
-	if($sth->rows == 0){
+	#now check if date differs
+	my $fetchedDate = try{
+		getHBDate($DB,$DBTable,$HBVersion,$HBAuthkey);
+	} catch{
+		"Failed to get HB date with: ".$_;
+	};
+	#HB is not in table yet
+	if(!defined($fetchedDate)){
 		return 0;
 	}
-	#mor than 1 HB - duplicate checking has not worked correctly 
-	if($sth->rows != 1){
-		croak "Warning: Already a duplicate HB in DB.";
-	}
-	#now check if date differs
-	my $fetchedDate;
-	$rv = $sth->bind_columns(\$fetchedDate);
-	$sth->fetch;
 	#HB is in table, timestamp differs from given
 	if($fetchedDate ne $HBDate){
 		return 1;
@@ -134,7 +127,6 @@ sub updateHBDate{
 	my $newDate = shift;
 	my $HBVersion = shift;
 	my $HBAuthkey = shift;
-	
 	if(!defined($DB)){
 		confess "Cannot use undefined database handle";
 	}
@@ -152,8 +144,36 @@ sub updateHBDate{
 	}
 }
 
-
-
+sub getHBDate{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			SELECT Date
+			FROM $DBTable
+			WHERE Version = ?
+			AND Authkey = ?" );
+	my $rv = $sth->execute($HBVersion,$HBAuthkey);
+	#the heartbeat is not in the table yet
+	if($sth->rows == 0){
+		return undef;
+	}
+	#mor than 1 HB - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		croak "Warning - Already a duplicate HB in DB.";
+	}
+	my $fetchedDate;
+	$rv = $sth->bind_columns(\$fetchedDate);
+	$sth->fetch;
+	return $fetchedDate;
+}
 
 1; # Magic true value required at end of module
 __END__
@@ -277,6 +297,14 @@ Parameters:
 	-The HB version
 	-The HB authkey
 
+=head2 getHBDate
+
+	print getHBDate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a");
+
+Read out the date for the given heartbeat (version,authkey). Returns the date
+as mysql string if succesfully read or undef if the authkey with its version
+is not in the database.
+
 =head1 DIAGNOSTICS
 
 =over
@@ -314,9 +342,9 @@ The specified database handle is undefined.
 Inserting a heartbeat should only affect 1 row, this error signals
 that the INSERT affected rows != 1.
 
-=item C<< Warning: Already a duplicate HB in DB. >>
+=item C<< Warning - Already a duplicate HB in DB. >>
 
-Checking for a duplicat heartbeat should return only 1 entry
+Checking for a duplicate heartbeat should return only 1 entry
 when carrying out a SELECT. If SELECT returns more than one entry
 than there is already a duplicate in the database.
 
