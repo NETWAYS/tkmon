@@ -60,7 +60,7 @@ This document describes Alert::Handler::Validation version 0.0.1
 =head1 SYNOPSIS
 
 Example:
-	
+
 	my $retCode = valAuthKey('9WNa8V2P86Q');
 	my $retCode = valAuthKey('r2XW84Nfi6v','9000091290');
 
@@ -73,7 +73,7 @@ notice is returned. In order to check an auth/serial combination a
 valid serial number must be provided as a second argument. If the monitoring
 service has not been bought by the customer 402 is returned.
 
-=head1 METHODS 
+=head1 METHODS
 
 =head2 valAuthKey
 
@@ -81,7 +81,7 @@ Example:
 
 	my $retCode = valAuthKey('9WNa8V2P86Q');
 	my $retCode = valAuthKey('r2XW84Nfi6v','9000091290');
-	
+
 Calls the REST API with libcurl an returns the status http code. If the second
 parameter is defined it must be a valid serial number.
 
@@ -113,7 +113,7 @@ Return Codes for auth/serial combinations:
 
 The call to the libcurl library to carry out the request 
 returned an error.
- 
+
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT

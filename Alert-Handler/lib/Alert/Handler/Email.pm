@@ -64,7 +64,6 @@ Alert::Handler::Email - Parse and modify email messages.
 
 This document describes Alert::Handler::Email version 0.0.1
 
-
 =head1 SYNOPSIS
 
 Example
@@ -76,7 +75,6 @@ Example
 	my $subject = getSubject($modifiedEmail);
 	my $body = getBody($email);
 
-  
 =head1 DESCRIPTION
 
 Alert::Handler::Email parses RFC2822 email messages. The parsing methods work with
@@ -99,7 +97,7 @@ for further usage.
 Example:
 
 	my $subject = getSubject($email);
-	
+
 Returns the subject of the given msg object $email - $email is an object
 returned by parseEmailStr.
 
@@ -108,7 +106,7 @@ returned by parseEmailStr.
 Example:
 
 	my $body = getBody($email);
-	
+
 Returns the body of the given msg object $email - $email is an object
 returned by parseEmailStr.
 
@@ -117,7 +115,7 @@ returned by parseEmailStr.
 Example:
 
 	my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
-	
+
 Replaces the subject of the given msg object $email with the second parameter.
 $email is an object returned by parseEmailStr, the function returns a new msg object
 with the modified subject.
@@ -127,7 +125,7 @@ with the modified subject.
 Example:
 
 	print toString($modifiedEmail);
-	
+
 Returns the msg object as string.
 
 =head1 DIAGNOSTICS

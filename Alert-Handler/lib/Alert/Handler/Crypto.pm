@@ -82,7 +82,7 @@ Example:
 	my $config = readGpgCfg('../gnupg/GpgConfig.cfg');
 	my $encrypted = encrypt($plaintext,'tktest@example.com');
 	my $decrypted = decrypt($encrypted,$config);
-  
+
 =head1 DESCRIPTION
 
 Alert::Handler::Crypto interacts with an imported gpg key and provides
@@ -127,7 +127,7 @@ Example:
 
 Decrypts the ciphertext given by $encrypted. The $config is a valid config hash
 returned by readGpgCfg.
-	
+
 =head1 DIAGNOSTICS
 
 =over

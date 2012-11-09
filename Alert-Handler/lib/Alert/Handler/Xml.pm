@@ -78,14 +78,14 @@ Example:
 Alert::Handler::Xml parses the defined xml structures. The module is able
 to handle valid heartbeat and alert xmls.
 
-=head1 METHODS 
+=head1 METHODS
 
 =head2 parseXmlFile
 
 Example:
 
 	my $hb_h = parseXmlFile('HeartbeatTest.xml');
-	
+
 Parses the xml file, only one parameter is needed - the file path. Returns
 a multi-level hash containing the xml structure.
 
@@ -94,7 +94,7 @@ a multi-level hash containing the xml structure.
 Example:
 
 	my $hb_h = parseXmlText($xml_str);
-	
+
 Parses the given xml string. Returns a multi-level hash containing the xml structure.
 
 =head2 getHBVersion
@@ -102,7 +102,7 @@ Parses the given xml string. Returns a multi-level hash containing the xml struc
 Example:
 
 	print getHBVersion($hb_h);
-	
+
 Returns the version tag of the heartbeat xml.
 
 =head2 getHBAuthKey
@@ -110,7 +110,7 @@ Returns the version tag of the heartbeat xml.
 Example:
 
 	print getHBAuthKey($hb_h);
-	
+
 Returns the authkey tag of the heartbeat xml.
 
 =head2 getHBDate
@@ -118,7 +118,7 @@ Returns the authkey tag of the heartbeat xml.
 Example:
 
 	print getHBAuthKey($hb_h);
-	
+
 Returns the date tag (timestamp) of the heartbeat xml.
 
 =head1 DIAGNOSTICS
@@ -132,7 +132,7 @@ The given xml file could not be parsed by parseXmlFile.
 =item C<< Could not parse XML string. >>
 
 The given xml string could not be parsed by parseXmlText.
- 
+
 =back
 
 =head1 DEPENDENCIES

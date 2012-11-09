@@ -80,7 +80,6 @@ Example:
 
 Converts a string containing a date to a Date::Time object. Currenty the following
 pattern is supported: '%a %b %d %H:%M:%S %Y' - day of week, month, day of month, HH:MM:SS, year (cf. Example above).
- 
 
 =head2 DateTimeToMysql
 
@@ -95,7 +94,7 @@ Returns a string in mysql DATETIME format from the given Date::Time object
 Example:
 
 	strToMysqlTime("Thu Oct 11 04:54:34 2012")
-	
+
 Converts the given date string to a string in mysql DATETIME format.
 
 =head1 DIAGNOSTICS
@@ -124,7 +123,7 @@ Alert::Handler::Converters requires no configuration files or environment variab
 	use version;
 	use DateTime::Format::Strptime;
 	use DateTime::Format::MySQL;
-	
+
 =head1 AUTHOR
 
 Georg Schönberger  C<< <gschoenberger@thomas-krenn.com> >>

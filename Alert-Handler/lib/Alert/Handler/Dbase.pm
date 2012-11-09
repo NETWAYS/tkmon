@@ -162,7 +162,6 @@ __END__
 
 Alert::Handler::Dbase - Access mysql databases and work with Heartbeats and Alerts
 
-
 =head1 VERSION
 
 This document describes Alert::Handler::Dbase version 0.0.1
@@ -180,7 +179,7 @@ Example
 		say "Found a duplicate: 0123456789a";
 	}
 	closeConnection($DBCon);
-  
+
 =head1 DESCRIPTION
 
 Alert::Handler::Dbase connects to a mysql database. The module is able to
@@ -200,6 +199,7 @@ is the corresponding section in the ini file that should be read out.
 The function returns a hash containing the config parameters.
 
 Example Config:
+
 	[alerts]
 	host = 192.168.56.101
 	db = tk_monitoring
@@ -240,18 +240,42 @@ Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
 
 Example:
 
-	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))){
+	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))==1){
 		say "Found a duplicate: 0123456789a";
 	}
 
-Checks if the given heartbeat (version, authkey, date) is already in the database.table. If yes '1' is
-returned signaling true, else '0' signaling false.
+Checks if the given heartbeat (version, authkey, date) is already in the database.table.
+
+Parameters:
+
+	-DB Handle
+	-Table name to inser HB to
+	-The HB version
+	-The HB authkey
+	-The new date time
+
+Return values:
+
+	-'0' if the heartbeat is not in the database
+	-'1' if the heartbeat is in the database but the date differs
+	-'-1' if the heartbeat is in the database and has the same date
 
 =head2 updateHBDate
 
 Example:
 
+	updateHBDate($DBCon,$mysqlCfg->{'table'},
+			strToMysqlTime("Fri Nov 09 14:44:34 2012"),"0.1-dev","0123456789a");
+
 Updates the DATETIME column of a given heartbeat.
+
+Parameters:
+
+	-DB Handle
+	-Table name to inser HB to
+	-The new date time
+	-The HB version
+	-The HB authkey
 
 =head1 DIAGNOSTICS
 
