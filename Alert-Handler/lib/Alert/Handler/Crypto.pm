@@ -6,8 +6,8 @@ use Carp;
 use Crypt::GPG;
 use Safe;
 use version;
-our $VERSION = qv('0.0.1');
 
+our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
@@ -40,7 +40,7 @@ sub encrypt{
 	my $gpg = new Crypt::GPG;
 	my $encrypted = eval{$gpg->encrypt($plaintext,$recipient)};
 	if($@){
-		confess "Error while encryptiong with GPG.";
+		confess "Error while encrypting with GPG.";
 	}
 	return $encrypted;
 }
@@ -160,7 +160,7 @@ The call to 'Crypt::GPG::decrypt' failed.
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
-  
+
 Alert::Handler::Crypto requires one configuration file to
 specify which gpg key to use. A call to readGpgCfg needs the
 path to this file in order to parse the file and init the 

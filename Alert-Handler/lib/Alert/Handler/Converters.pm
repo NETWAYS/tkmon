@@ -55,91 +55,66 @@ Alert::Handler::Converters - Several converting functions.
 
 =head1 VERSION
 
-This document describes Alert::Handler::Email version 0.0.1
-
+This document describes Alert::Handler::Converters version 0.0.1
 
 =head1 SYNOPSIS
 
 Example
 
-	use Alert::Handler::Email;
-	my $email = parseEmailStr($email_str);
-	my $subject = getSubject($email);
-	my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
-	my $subject = getSubject($modifiedEmail);
-	my $body = getBody($email);
+	my $dt = strToDateTime('Thu Oct 11 04:54:34 2012');
+	print DateTimeToMysql($dt);
 
-  
 =head1 DESCRIPTION
 
-Alert::Handler::Email parses RFC2822 email messages. The parsing methods work with
-msg objects, in order to get such an object the parseEmailStr method has to be called.
-This method takes an email as string as an argument an returns a msg object.
+Alert::Handler::Converters provides functions to convert string and date objects
+for the usage in the TK Monitoring application. Especially functions to convert
+to mysql formats are needed.
 
 =head1 METHODS 
 
-=head2 parseEmailStr
+=head2 strToDateTime
 
 Example:
 
-	my $email = parseEmailStr($email_str);
+	my $dt = strToDateTime('Thu Oct 11 04:54:34 2012');
 
-Parses $email_str, a email message as string. Returns an Email::Simple msg object
-for further usage.
+Converts a string containing a date to a Date::Time object. Currenty the following
+pattern is supported: '%a %b %d %H:%M:%S %Y' - day of week, month, day of month, HH:MM:SS, year (cf. Example above).
+ 
 
-=head2 getSubject
+=head2 DateTimeToMysql
 
 Example:
 
-	my $subject = getSubject($email);
+	my $str = DateTimeToMysql($dt);
+
+Returns a string in mysql DATETIME format from the given Date::Time object
+
+=head2 strToMysqlTime
+
+Example:
+
+	strToMysqlTime("Thu Oct 11 04:54:34 2012")
 	
-Returns the subject of the given msg object $email - $email is an object
-returned by parseEmailStr.
-
-=head2 getBody
-
-Example:
-
-	my $body = getBody($email);
-	
-Returns the body of the given msg object $email - $email is an object
-returned by parseEmailStr.
-
-=head2 replaceSubject
-
-Example:
-
-	my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
-	
-Replaces the subject of the given msg object $email with the second parameter.
-$email is an object returned by parseEmailStr, the function returns a new msg object
-with the modified subject.
-
-=head2 toString
-
-Example:
-
-	print toString($modifiedEmail);
-	
-Returns the msg object as string.
+Converts the given date string to a string in mysql DATETIME format.
 
 =head1 DIAGNOSTICS
 
 =over
 
-=item C<< Cannot parse an empty email message string. >>
+=item C<< Cannot use undefined date string. >>
 
-The given email string to parseEmailStr is empty.
+The given string containing a date is undefined.
 
-=item C<< Cannot parse an undefined msg. >>
+=item C<< Cannot use undefined date time object. >>
 
-The email msg object is undefined.
+The given Date::Time object is undefined.
 
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Alert::Handler::Email requires no configuration files or environment variables.
+Alert::Handler::Converters requires no configuration files or environment variables.
 
 =head1 DEPENDENCIES
 
@@ -148,6 +123,7 @@ Alert::Handler::Email requires no configuration files or environment variables.
 	use Carp;
 	use version;
 	use DateTime::Format::Strptime;
+	use DateTime::Format::MySQL;
 	
 =head1 AUTHOR
 
