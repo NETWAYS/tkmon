@@ -30,6 +30,9 @@ sub parseXmlFile{
 
 sub parseXmlText{
 	my $xml_str = shift;
+	if(!defined($xml_str)){
+		confess "Cannot parse empty xml string.";
+	}
 	my $xml = new XML::Bare( text => $xml_str );
 	my $root = eval {$xml->parse()};
 	if($@){
@@ -132,6 +135,10 @@ The given xml file could not be parsed by parseXmlFile.
 =item C<< Could not parse XML string. >>
 
 The given xml string could not be parsed by parseXmlText.
+
+=item C<< Cannot parse empty xml string. >>
+
+The given xml string to the parsing function is undefined.
 
 =back
 

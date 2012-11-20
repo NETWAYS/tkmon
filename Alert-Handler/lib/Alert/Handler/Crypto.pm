@@ -60,6 +60,9 @@ sub decrypt{
 	if($@){
 		confess "Error while decryptiong with GPG.";
 	}
+	if(!defined($decrypted)){
+		confess "Error while GPG decryption, empty plaintext returned";
+	}
 	return $decrypted;
 }
 
@@ -156,6 +159,11 @@ the correct parameters.
 =item C<< Error while decryptiong with GPG. >>
 
 The call to 'Crypt::GPG::decrypt' failed.
+
+=item C<< Error while GPG decryption, empty plaintext returned >>
+
+The Crypt::GPG::decrypt function returned an undefined value.
+
 
 =back
 
