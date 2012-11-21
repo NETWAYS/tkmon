@@ -1,29 +1,48 @@
 #!/usr/bin/perl -w
-
 use strict;
 use warnings;
 use Try::Tiny;
-
+use feature qw(say);
 #Alert Handler modules to process emails
 use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
 
-use feature qw(say);
+our $FILTER_DIR = "/etc/postfix/filter";
+our $LOG_DIR = "/var/log/tk-mail-monitoring";
+our $SENDMAIL = "/usr/sbin/sendmail";
+#Exit codes of commands invoked by postfix
+our $TEMPFAIL = 75;
+our $UNAVAILABLE = 69;
 
-#Setup the logger
+#Setup the loggers for monitoring filter and debugging
+#TODO Check if logging works with multiple simultanious filter processes
 use Log::Dispatch;
 use Log::Dispatch::File;
 my $tkLogger = Log::Dispatch->new();
 $tkLogger->add(
 	Log::Dispatch::File->new(
 		name => 'to_file',
-		filename => 'tkmonitor.log',
+		filename => "$LOG_DIR/tkmonitor.log",
 		mode => 'append',
+		newline => 1,
 		min_level => 'debug',
 		max_level => 'emergency',
 	)
 );
+my $debugLogger = Log::Dispatch->new();
+$debugLogger->add(
+	Log::Dispatch::File->new(
+		name => 'to_file',
+		filename => "$LOG_DIR/debug.log",
+		mode => 'append',
+		newline => 1,
+		min_level => 'debug',
+		max_level => 'emergency',
+	)
+);
+
+
 
 #Start processing the email
 my $msg_str;
