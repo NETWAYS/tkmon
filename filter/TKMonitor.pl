@@ -42,8 +42,6 @@ $debugLogger->add(
 	)
 );
 
-
-
 #Start processing the email
 my $msg_str;
 while(<STDIN>){
