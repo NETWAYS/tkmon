@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 use Crypt::GPG;
-use Safe;
+use Config::IniFiles;
 use version;
 
 our $VERSION = qv('0.0.1');
@@ -17,16 +17,24 @@ BEGIN {
 
 sub readGpgCfg{
 	my $cfgPath = shift;
-	my $gpgCfg = Safe->new->rdo($cfgPath);
-	if(ref($gpgCfg) ne "HASH"){
-		confess "Could not read gpg config.";
+	my $section = shift;
+	if(!defined($cfgPath) || !defined($section)){
+		confess "Cannot use empty config path or empty section."
 	}
-	if(!(exists $gpgCfg->{'gpgbin'}) ||
-	!(exists $gpgCfg->{'secretkey'}) ||
-	!(exists $gpgCfg->{'passphrase'})){
+	my %gpgCfg;
+	eval{
+		tie %gpgCfg, 'Config::IniFiles', (-file => $cfgPath);
+	};
+	if($@){
+		confess "Could not read mysql config";
+	}
+	my %cfgSection =  %{$gpgCfg{$section}};
+	if(!(exists $cfgSection{'gpgbin'}) ||
+	!(exists $cfgSection{'secretkey'}) ||
+	!(exists $cfgSection{'passphrase'})){
 		confess "Gpg config does not contain the right parameters.";
 	}
-	return $gpgCfg;
+	return \%cfgSection;
 }
 
 sub encrypt{

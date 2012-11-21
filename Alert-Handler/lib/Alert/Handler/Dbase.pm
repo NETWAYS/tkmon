@@ -14,7 +14,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDate); # symbols to export
+	updateHBDate getHBDateDB); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -30,8 +30,8 @@ sub readMysqlCfg{
 	if($@){
 		confess "Could not read mysql config";
 	}
-	my %section =  %{$mysqlCfg{$section}};
-	return \%section;
+	my %cfgSection =  %{$mysqlCfg{$section}};
+	return \%cfgSection;
 }
 
 sub getConnection{
@@ -103,7 +103,7 @@ sub HBIsDuplicate{
 		}
 	#now check if date differs
 	my $fetchedDate = try{
-		getHBDate($DB,$DBTable,$HBVersion,$HBAuthkey);
+		getHBDateDB($DB,$DBTable,$HBVersion,$HBAuthkey);
 	} catch{
 		"Failed to get HB date with: ".$_;
 	};
@@ -144,7 +144,7 @@ sub updateHBDate{
 	}
 }
 
-sub getHBDate{
+sub getHBDateDB{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $HBVersion = shift;

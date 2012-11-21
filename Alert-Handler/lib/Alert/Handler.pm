@@ -42,7 +42,7 @@ sub parseMsgStr{
 
 sub decryptXml{
 	my $self = shift;
-	my $gpgConfig = readGpgCfg($self->gpgCfg);
+	my $gpgConfig = readGpgCfg($self->gpgCfg,'gpg');
 	$self->xml(decrypt($self->msgBody,$gpgConfig));
 	return $self;
 }

@@ -61,7 +61,7 @@ my $gpgConfig;
 my $xml_str;
 try{
 	$encBody_str = getBody($msg);
-	$gpgConfig = readGpgCfg('../gnupg/GpgConfig.cfg');
+	$gpgConfig = readGpgCfg('../gnupg/GpgConfig.cfg','gpg');
 	$xml_str = decrypt($encBody_str,$gpgConfig);
 	#assume for now it is a heartbeat
 	my $hb_h = parseXmlText($xml_str);

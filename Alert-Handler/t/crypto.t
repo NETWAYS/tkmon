@@ -5,7 +5,7 @@ use Test::More tests => 4;
 use Alert::Handler::Crypto;
 
 my $plaintext = 'The quick brown fox jumps over the lazy dog';
-my $config = readGpgCfg('../gnupg/GpgConfig.cfg');
+my $config = readGpgCfg('../gnupg/GpgConfig.cfg','gpg');
 
 is($config->{'gpgbin'}, '/usr/bin/gpg','gpg binary');
 is($config->{'secretkey'}, '0x9B6B1E58','gpg seckey id');

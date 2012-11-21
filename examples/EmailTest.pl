@@ -7,7 +7,7 @@ MAIN:{
 	
 	#open FILE, "<", $ARGV[0] or die $!;
 	try{
-		my $config = readGpgCfg('../gnupg/GpgConfig.cfg');
+		my $config = readGpgCfg('../gnupg/GpgConfig.cfg','gpg');
 	} catch{
 		say "Reading config died with: @_";
 	};

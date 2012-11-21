@@ -28,7 +28,7 @@ MAIN:{
 			updateHBDate($DBCon,$mysqlCfg->{'table'},
 			strToMysqlTime("Fri Nov 09 20:58:34 2012"),"0.1-dev","0123456789a");
 		};
-		say "Fetched date from DB: ".getHBDate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a");
+		say "Fetched date from DB: ".getHBDateDB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a");
 	} catch{
 		die "Failed with: $_";
 	} finally{
