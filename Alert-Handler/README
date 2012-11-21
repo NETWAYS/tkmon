@@ -7,7 +7,7 @@ To install this module, run the following commands:
 	perl Makefile.PL
 	make
 	make test
-	make install
+	sudo make install
 
 DEPENDENCIES
 
@@ -27,6 +27,12 @@ On debian based systems install:
 	libcrypt-gpg-perl libwww-curl-perl libxml-bare-perl
 	libemail-simple-perl liblog-dispatch-perl libdbi-perl libconfig-inifiles-perl
 	libdatetime-format-strptime-perl libdatetime-format-mysql-perl
+
+GPG INSTALLATION
+
+In order to decrypt incoming emails setupt the private key information
+in the GpgConfig.cfg.
+
 
 COPYRIGHT AND LICENCE
 

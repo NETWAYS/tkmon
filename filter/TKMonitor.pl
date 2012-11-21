@@ -25,12 +25,6 @@ $tkLogger->add(
 	)
 );
 
-
-use Benchmark;
-
-my $t0 = Benchmark->new;
-
-
 #Start processing the email
 my $msg_str;
 while(<STDIN>){
@@ -60,9 +54,6 @@ try{
 	$tkLogger->emergency("Failed with: $_");
 	exit(1);
 };
-my $t1 = Benchmark->new;
-my $td = timediff($t1, $t0);
-say "The code took:",timestr($td),"\n";
 
 __END__
 

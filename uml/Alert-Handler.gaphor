@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gaphor xmlns="http://gaphor.sourceforge.net/model" version="3.0" gaphor-version="0.17.0">
+<Package id="d9dccafe-32f5-11e2-9857-100ba9303bd8">
+<name>
+<val>New model</val>
+</name>
+<ownedClassifier>
+<reflist>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</reflist>
+</ownedClassifier>
+<ownedDiagram>
+<reflist>
+<ref refid="d9de046e-32f5-11e2-9857-100ba9303bd8"/>
+</reflist>
+</ownedDiagram>
+</Package>
+<Diagram id="d9de046e-32f5-11e2-9857-100ba9303bd8">
+<name>
+<val>main</val>
+</name>
+<package>
+<ref refid="d9dccafe-32f5-11e2-9857-100ba9303bd8"/>
+</package>
+<canvas>
+<item type="ClassItem" id="e74a4d38-32f5-11e2-9857-100ba9303bd8">
+<show-attributes>
+<val>1</val>
+</show-attributes>
+<show-operations>
+<val>1</val>
+</show-operations>
+<drawing-style>
+<val>1</val>
+</drawing-style>
+<matrix>
+<val>(1.0, 0.0, 0.0, 1.0, 287.0, 175.0)</val>
+</matrix>
+<width>
+<val>391.0</val>
+</width>
+<height>
+<val>389.0</val>
+</height>
+<subject>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</subject>
+<show_stereotypes_attrs>
+<val>0</val>
+</show_stereotypes_attrs>
+</item>
+</canvas>
+</Diagram>
+<Class id="e748b6ee-32f5-11e2-9857-100ba9303bd8">
+<name>
+<val>AlertHandler</val>
+</name>
+<ownedAttribute>
+<reflist>
+<ref refid="6419d7a2-32f6-11e2-9857-100ba9303bd8"/>
+<ref refid="70eb118a-32f6-11e2-9857-100ba9303bd8"/>
+<ref refid="4b3aba4e-32f6-11e2-9857-100ba9303bd8"/>
+<ref refid="a147fe8c-32f7-11e2-9857-100ba9303bd8"/>
+<ref refid="ba24ad6a-32f7-11e2-9857-100ba9303bd8"/>
+</reflist>
+</ownedAttribute>
+<package>
+<ref refid="d9dccafe-32f5-11e2-9857-100ba9303bd8"/>
+</package>
+<presentation>
+<reflist>
+<ref refid="e74a4d38-32f5-11e2-9857-100ba9303bd8"/>
+</reflist>
+</presentation>
+</Class>
+<Property id="4b3aba4e-32f6-11e2-9857-100ba9303bd8">
+<class_>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</class_>
+<name>
+<val>encEmail</val>
+</name>
+<visibility>
+<val>private</val>
+</visibility>
+</Property>
+<Property id="6419d7a2-32f6-11e2-9857-100ba9303bd8">
+<class_>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</class_>
+<name>
+<val>sender</val>
+</name>
+<visibility>
+<val>private</val>
+</visibility>
+</Property>
+<Property id="70eb118a-32f6-11e2-9857-100ba9303bd8">
+<class_>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</class_>
+<name>
+<val>receiver</val>
+</name>
+<visibility>
+<val>private</val>
+</visibility>
+</Property>
+<Property id="a147fe8c-32f7-11e2-9857-100ba9303bd8">
+<class_>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</class_>
+<name>
+<val>xmlString</val>
+</name>
+<visibility>
+<val>private</val>
+</visibility>
+</Property>
+<Property id="ba24ad6a-32f7-11e2-9857-100ba9303bd8">
+<class_>
+<ref refid="e748b6ee-32f5-11e2-9857-100ba9303bd8"/>
+</class_>
+<name>
+<val>xmlHash</val>
+</name>
+<visibility>
+<val>private</val>
+</visibility>
+</Property>
+</gaphor>
