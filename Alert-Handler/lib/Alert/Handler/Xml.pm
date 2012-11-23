@@ -12,11 +12,12 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseXmlFile parseXmlText getHBVersion getHBAuthKey getHBDate); # symbols to export
+	@EXPORT = qw(parseXmlFile parseXmlText getHBVersion getHBAuthKey getHBDate
+	getXmlType); # symbols to export
 }
 
 our $HBROOTTAG = "heartbeat";
-our $AUTHKEYTAG = "authkey";
+our $ALERTROOTTAG = "alert";
 
 sub parseXmlFile{
 	my $filename = shift;
@@ -39,6 +40,16 @@ sub parseXmlText{
 		confess "Could not parse XML string."
 	}
 	return $root;
+}
+
+sub getXmlType{
+	my $root = shift;
+	if(exists $root->{$HBROOTTAG}){
+		return $HBROOTTAG;
+	}
+	if(exists $root->{$ALERTROOTTAG}){
+		return $ALERTROOTTAG;
+	}
 }
 
 sub getHBVersion{
@@ -99,6 +110,15 @@ Example:
 	my $hb_h = parseXmlText($xml_str);
 
 Parses the given xml string. Returns a multi-level hash containing the xml structure.
+
+= getXmlType
+
+Example:
+
+	print getXmlType($hb_h);
+	
+Returns the type for the given, parsed xml root $hb_h. The type can be
+'heartbeat' or 'alert'.
 
 =head2 getHBVersion
 
