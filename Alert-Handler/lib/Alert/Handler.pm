@@ -8,6 +8,7 @@ use version;
 use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
+use Alert::Handler::Heartbeat;
 
 our $VERSION = qv('0.0.1');
 
@@ -55,6 +56,12 @@ sub parseXml{
 	$self->xmlType(getXmlType($self->xml_h));
 }
 
+sub handleHB{
+	my $xmlRoot = shift;
+	my $heartbeat = Alert::Handler::Heartbeat->new(
+	xmlRoot => $xmlRoot
+	);
+}
 
 
 1; # Magic true value required at end of module
@@ -66,20 +73,8 @@ Alert::Handler - Work with TK-Monitoring emails
 
 =head1 VERSION
 
-This document describes Alert::Handler ersion 0.0.1
+This document describes Alert::Handler version 0.0.1
 
 =head1 SYNOPSIS
 
 Example:
-
-=head1 METHODS 
-
-=head2 new
-
-Example:
-
-	my $tkHandler = Alert::Handler->new(
-		sender => 'tktest@example.com'
-	);
-	
-The constructor - creates a Handler object.

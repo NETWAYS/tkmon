@@ -5,8 +5,6 @@ use strict;
 use Carp;
 use version;
 
-use Alert::Handler::Xml;
-
 our $VERSION = qv('0.0.1');
 
 our (@ISA, @EXPORT);
@@ -20,7 +18,16 @@ sub new{
 	my $class = shift;
 	my $self = {@_};
 	bless ($self,$class	);
+	$self->_init();
 	return $self;
+}
+
+sub _init{
+	my $self = shift;
+	my $xml_h = $self->xmlRoot();
+	$self->version($xml_h->{heartbeat}->{version}->{value});
+	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
+	$self->date($xml_h->{heartbeat}->{date}->{value});
 }
 
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
@@ -28,13 +35,6 @@ sub version { $_[0]->{sender} = $_[1] if defined $_[1]; $_[0]->{sender} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
 sub date { $_[0]->{date} = $_[1] if defined $_[1]; $_[0]->{date} }
 
-sub initialize{
-	my $self = shift;
-	my $xml_h = $self->xmlRoot();
-	$self->version($xml_h->{heartbeat}->{version}->{value});
-	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
-	$self->date($xml_h->{heartbeat}->{date}->{value});
-}
 
 1; # Magic true value required at end of module
 __END__

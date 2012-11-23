@@ -91,12 +91,12 @@ if(!defined($tkHandler->xmlType())){
 	exit(0);	
 }
 if($tkHandler->xmlType() eq 'heartbeat'){
-	
+	$tkHandler->handleHB();
 }
 
 $tkLogger->info("Xml type: ".$tkHandler->xmlType());
 $tkLogger->info("Mail sender: ".$tkHandler->sender());
-$tkLogger->info("HB version: ".getHBVersion($tkHandler->xml_h()));
+#$tkLogger->info("HB version: ".getHBVersion($tkHandler->xml_h()));
 
 
 

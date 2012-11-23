@@ -52,20 +52,7 @@ sub getXmlType{
 	}
 }
 
-sub getHBVersion{
-	my $root = shift;
-	return $root->{heartbeat}->{version}->{value};
-}
 
-sub getHBAuthKey{
-	my $root = shift;
-	return $root->{heartbeat}->{authkey};
-}
-
-sub getHBDate{
-	my $root = shift;
-	return $root->{heartbeat}->{date}->{value};
-}
 
 1; # Magic true value required at end of module
 __END__
