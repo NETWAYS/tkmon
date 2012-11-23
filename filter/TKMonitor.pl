@@ -2,14 +2,15 @@
 use strict;
 use warnings;
 use Try::Tiny;
-use feature qw(say);
 #Alert Handler modules to process emails
+use Alert::Handler;
 use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
 
 our $FILTER_DIR = "/etc/postfix/filter";
-our $LOG_DIR = "/var/log/tk-mail-monitoring";
+#FIXME Insert correct logging directory
+our $LOG_DIR = "./";
 our $SENDMAIL = "/usr/sbin/sendmail";
 #Exit codes of commands invoked by postfix
 our $TEMPFAIL = 75;
@@ -17,6 +18,12 @@ our $UNAVAILABLE = 69;
 
 #Setup the loggers for monitoring filter and debugging
 #TODO Check if logging works with multiple simultanious filter processes
+#TODO Maybe we should log directly with syslog?
+my $LOGADD = sub {
+	my %log_h = @_;
+	$log_h{message} = scalar(localtime())." - ".$log_h{message};
+	return $log_h{message};
+};
 use Log::Dispatch;
 use Log::Dispatch::File;
 my $tkLogger = Log::Dispatch->new();
@@ -28,6 +35,7 @@ $tkLogger->add(
 		newline => 1,
 		min_level => 'debug',
 		max_level => 'emergency',
+		callbacks => $LOGADD,
 	)
 );
 my $debugLogger = Log::Dispatch->new();
@@ -48,29 +56,51 @@ while(<STDIN>){
 	$msg_str .= $_;
 }
 
-#parse the email
-my $msg = try{
-	parseEmailStr($msg_str);
-} catch{
-	$tkLogger->emergency("Failed with: $_");
-}; 
-
-#decrypt the body with a specified key
-my $encBody_str;
-my $gpgConfig;
-my $xml_str;
+#Setup up the Handler and decrypt the email
+my $tkHandler = Alert::Handler->new(
+	sender => $ARGV[0]
+);
 try{
-	$encBody_str = getBody($msg);
-	$gpgConfig = readGpgCfg('../gnupg/GpgConfig.cfg','gpg');
-	$xml_str = decrypt($encBody_str,$gpgConfig);
-	#assume for now it is a heartbeat
-	my $hb_h = parseXmlText($xml_str);
-	#As a first test print the heartbeat version
-	$tkLogger->info("HB version: ".getHBVersion($hb_h));	
+	$tkHandler->msg_str($msg_str);
+	$tkHandler->parseMsgStr();
+	$tkHandler->gpgCfg('../gnupg/GpgConfig.cfg');
+	$tkHandler->decryptXml();
 } catch{
-	$tkLogger->emergency("Failed with: $_");
+	$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);
 	exit(1);
 };
+#Check if the email body is not empty
+if(!defined($tkHandler->xml())){
+#Log which mail has been discarded
+	$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded,
+	no valid body found.");
+	exit(0);
+}
+
+#We now have the decrypted XML from the body, now parse it
+try{
+	$tkHandler->parseXml();
+} catch{
+	$tkLogger->emergency("Failed to parse XML with: ".$_);
+	exit(1);
+};
+#Check of which type the xml/mail is
+if(!defined($tkHandler->xmlType())){
+#TODO Log which email from whom has been discarded
+	$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
+	exit(0);	
+}
+if($tkHandler->xmlType() eq 'heartbeat'){
+	
+}
+
+$tkLogger->info("Xml type: ".$tkHandler->xmlType());
+$tkLogger->info("Mail sender: ".$tkHandler->sender());
+$tkLogger->info("HB version: ".getHBVersion($tkHandler->xml_h()));
+
+
+
+
 
 __END__
 

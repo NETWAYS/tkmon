@@ -32,6 +32,8 @@ sub msg_str { $_[0]->{msg_str} = $_[1] if defined $_[1]; $_[0]->{msg_str} }
 sub msg { $_[0]->{msg} = $_[1] if defined $_[1]; $_[0]->{msg} }
 sub msgBody { $_[0]->{msgBody} = $_[1] if defined $_[1]; $_[0]->{msgBody} }
 sub xml { $_[0]->{xml} = $_[1] if defined $_[1]; $_[0]->{xml} }
+sub xml_h { $_[0]->{xml_h} = $_[1] if defined $_[1]; $_[0]->{xml_h} }
+sub xmlType { $_[0]->{xmlType} = $_[1] if defined $_[1]; $_[0]->{xmlType} }
 
 sub parseMsgStr{
 	my $self = shift;
@@ -46,6 +48,13 @@ sub decryptXml{
 	$self->xml(decrypt($self->msgBody,$gpgConfig));
 	return $self;
 }
+
+sub parseXml{
+	my $self = shift;
+	$self->xml_h(parseXmlText($self->xml()));
+	$self->xmlType(getXmlType($self->xml_h));
+}
+
 
 
 1; # Magic true value required at end of module
