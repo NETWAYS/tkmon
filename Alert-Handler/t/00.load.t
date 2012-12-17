@@ -9,6 +9,7 @@ use_ok( 'Alert::Handler::Validation' );
 use_ok( 'Alert::Handler::Email' );
 use_ok( 'Alert::Handler::Dbase' );
 use_ok( 'Alert::Handler::Converters' );
+use_ok( 'Alert::Handler::TKLogger' );
 }
 
 diag( "Testing Alert::Handler $Alert::Handler::VERSION" );

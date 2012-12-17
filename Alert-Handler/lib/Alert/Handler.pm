@@ -95,10 +95,9 @@ sub handleHB{
 	}
 	#HB not in DB
 	if($ret == 0){
-		#only insert HB if authkey valid
 		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
 			$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
-		$tkLogger->info("Inserted new HB in DB: ".heartbeat->authkey());
+		$tkLogger->info("Inserted new HB in DB: ".$heartbeat->authkey());
 	}
 	if($ret == -1){
 		$tkLogger->info("HB with same timestamp already in DB: ".$heartbeat->authkey());
