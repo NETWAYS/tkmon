@@ -58,6 +58,7 @@ sub closeConnection{
 sub insertHB{
 	my $DB = shift;
 	my $DBTable = shift;
+	my $HBSender = shift;
 	my $HBVersion = shift;
 	my $HBAuthkey = shift;
 	my $HBDate = shift;
@@ -75,9 +76,9 @@ sub insertHB{
 		}
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
-			(Version, Authkey, Date)
-			VALUES (?, ?, ?)" );
-	my $rv = $sth->execute($HBVersion,$HBAuthkey,$HBDate);
+			(Sender_Email, Version, Authkey, Date)
+			VALUES (?, ?, ?, ?)" );
+	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,$HBDate);
 	if($rv != 1){
 		confess "Affected rows for inseting HB returned wrong count.";
 	}
@@ -251,10 +252,11 @@ Closes an open database connection by the given handle.
 
 Example:
 
-	insertHB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
+	insertHB($DBCon,$mysqlCfg->{'table'},"test@exmaple.com",
+	"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
 
 Inserts a new heartbeat into the given table. The database is specified by a valid
-database handle. Parameters: Database handle, Database table, HB version, HB authkey, HB date
+database handle. Parameters: Database handle, Database table, HB sender, HB version, HB authkey, HB date
 Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
 
 =head2 HBIsDuplicate

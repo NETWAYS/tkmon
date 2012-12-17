@@ -80,14 +80,24 @@ sub handleHB{
 	$self->heartbeat($heartbeat);
 	
 	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
-	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
-		$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date())) == 1){
+	my $ret;
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
+		$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
+	#found a duplicate
+	if($ret == 1){
 		updateHBDate($DBCon,$mysqlCfg->{'table'},
 			strToMysqlTime($heartbeat->date()),
 			$heartbeat->version(),$heartbeat->authkey());
 		closeConnection($DBCon);
 		return 1;
-	};
+	}
+	#HB not in DB
+	if($ret == 0){
+		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
+			$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
+		return 0;
+	}
+	return $ret;
 }
 
 

@@ -95,8 +95,16 @@ if(!defined($tkHandler->xmlType()) ||
 if($tkHandler->xmlType() eq 'heartbeat'){
 	try{
 		$tkLogger->info("Xml type: ".$tkHandler->xmlType());
-		if($tkHandler->handleHB() == 1){
+		my $ret = $tkHandler->handleHB();
+		#handle HB returns a duplicate
+		if($ret == 1){
 			$tkLogger->info("Found HB duplicate: ".$tkHandler->heartbeat()->authkey());
+		}
+		if($ret == 0){
+			$tkLogger->info("Insertet new HB in DB: ".$tkHandler->heartbeat()->authkey());
+		}
+		if($ret == -1){
+			$tkLogger->info("HB with same timestamp already in DB: ".$tkHandler->heartbeat()->authkey());
 		}
 	} catch{
 		$tkLogger->emergency("Failed to handle HB with: ".$_);
