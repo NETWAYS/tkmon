@@ -7,49 +7,17 @@ use Alert::Handler;
 use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
+use Alert::Handler::TKLogger;
 
 our $FILTER_DIR = "/etc/postfix/filter";
-#FIXME Insert correct logging directory
-our $LOG_DIR = "./";
 our $SENDMAIL = "/usr/sbin/sendmail";
 #Exit codes of commands invoked by postfix
 our $TEMPFAIL = 75;
 our $UNAVAILABLE = 69;
 
-#Setup the loggers for monitoring filter and debugging
-#TODO Check if logging works with multiple simultanious filter processes
-#TODO Maybe we should log directly with syslog?
-my $LOGADD = sub {
-	my %log_h = @_;
-	$log_h{message} = scalar(localtime())." - ".$log_h{message};
-	return $log_h{message};
-};
-use Log::Dispatch;
-use Log::Dispatch::File;
-my $tkLogger = Log::Dispatch->new();
-$tkLogger->add(
-	Log::Dispatch::File->new(
-		name => 'to_file',
-		filename => "$LOG_DIR/tkmonitor.log",
-		mode => 'append',
-		newline => 1,
-		min_level => 'debug',
-		max_level => 'emergency',
-		callbacks => $LOGADD,
-	)
-);
-my $debugLogger = Log::Dispatch->new();
-$debugLogger->add(
-	Log::Dispatch::File->new(
-		name => 'to_file',
-		filename => "$LOG_DIR/debug.log",
-		mode => 'append',
-		newline => 1,
-		min_level => 'debug',
-		max_level => 'emergency',
-		callbacks => $LOGADD,
-	)
-);
+my $tkLogger = Alert::Handler::TKLogger->new(
+		cfgPath => './Logger.cfg'
+	);
 
 #Start processing the email
 my $msg_str;
@@ -96,16 +64,6 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 	try{
 		$tkLogger->info("Xml type: ".$tkHandler->xmlType());
 		my $ret = $tkHandler->handleHB();
-		#handle HB returns a duplicate
-		if($ret == 1){
-			$tkLogger->info("Found HB duplicate: ".$tkHandler->heartbeat()->authkey());
-		}
-		if($ret == 0){
-			$tkLogger->info("Insertet new HB in DB: ".$tkHandler->heartbeat()->authkey());
-		}
-		if($ret == -1){
-			$tkLogger->info("HB with same timestamp already in DB: ".$tkHandler->heartbeat()->authkey());
-		}
 	} catch{
 		$tkLogger->emergency("Failed to handle HB with: ".$_);
 		exit(1);

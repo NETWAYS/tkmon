@@ -10,11 +10,15 @@ use Alert::Handler::Email;
 use Alert::Handler::Xml;
 use Alert::Handler::Dbase;
 use Alert::Handler::Converters;
+use Alert::Handler::Validation;
+use Alert::Handler::TKLogger;
 use Alert::Handler::Heartbeat;
 
 our $VERSION = qv('0.0.1');
-
-our $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
+my $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
+my $tkLogger = Alert::Handler::TKLogger->new(
+		cfgPath => './Logger.cfg'
+	);
 
 our (@ISA, @EXPORT);
 BEGIN {
@@ -28,10 +32,6 @@ sub new{
 	my $self = {@_};
 	bless ($self,$class	);
 	return $self;
-}
-
-sub DESTROY{
-	
 }
 
 sub sender { $_[0]->{sender} = $_[1] if defined $_[1]; $_[0]->{sender} }
@@ -78,7 +78,10 @@ sub handleHB{
 		xmlRoot => $self->xml_h()
 	);
 	$self->heartbeat($heartbeat);
-	
+	if(valAuthKey($heartbeat->authkey()) ne '200'){
+		$tkLogger->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());
+		return;
+	}
 	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
 	my $ret;
 	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
@@ -88,16 +91,20 @@ sub handleHB{
 		updateHBDate($DBCon,$mysqlCfg->{'table'},
 			strToMysqlTime($heartbeat->date()),
 			$heartbeat->version(),$heartbeat->authkey());
-		closeConnection($DBCon);
-		return 1;
+		$tkLogger->info("Found HB duplicate: ".$heartbeat->authkey());
 	}
 	#HB not in DB
 	if($ret == 0){
+		#only insert HB if authkey valid
 		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
 			$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
-		return 0;
+		$tkLogger->info("Inserted new HB in DB: ".heartbeat->authkey());
 	}
-	return $ret;
+	if($ret == -1){
+		$tkLogger->info("HB with same timestamp already in DB: ".$heartbeat->authkey());
+	}
+	closeConnection($DBCon);
+	return;
 }
 
 
