@@ -28,6 +28,11 @@ On debian based systems install:
 	libemail-simple-perl liblog-dispatch-perl libdbi-perl libconfig-inifiles-perl
 	libdatetime-format-strptime-perl libdatetime-format-mysql-perl
 
+DOCUMENTATION
+
+To generate a html version of the pod:
+	$ pods2html --index index.html Alert-Handler/lib/Alert doc/
+
 GPG INSTALLATION
 
 In order to decrypt incoming emails setupt the private key information

@@ -233,7 +233,7 @@ Example:
 Establish a mysql connection and read out the given section of the
 configuration file. The config file path is a static class variable.
 
-=head 2 handleHB
+=head2 handleHB
 
 Handles a heartbeat object - checks if the auth key is valid, if the timestamp
 must be updated in the database or if the heartbeat has to inserted into the

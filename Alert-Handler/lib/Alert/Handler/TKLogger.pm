@@ -119,7 +119,7 @@ Constructor - creates a new TKLogger object with the given log
 configuration. The configuration defines the path of the log file
 and the desired log level.
 
-= head2 _init
+=head2 _init
 
 A private function to check the config, read the config
 sections an create the Log::Dispatch object.

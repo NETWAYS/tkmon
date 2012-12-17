@@ -27,6 +27,8 @@
 
 </A><LI><A HREF="#updateHBDate">updateHBDate
 
+</A><LI><A HREF="#getHBDate">getHBDate
+
 </A></UL>
 <LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
 
@@ -136,10 +138,11 @@ On Success returns a valid database handle else raises an error.
 <P>Example:
 
 </P>
-<PRE>	insertHB($DBCon,$mysqlCfg-&gt;{'table'},&quot;0.1-dev&quot;,&quot;0123456789a&quot;,strToMysqlTime(&quot;Thu Oct 11 04:54:34 2012&quot;));</PRE>
+<PRE>	insertHB($DBCon,$mysqlCfg-&gt;{'table'},&quot;test@exmaple.com&quot;,
+	&quot;0.1-dev&quot;,&quot;0123456789a&quot;,strToMysqlTime(&quot;Thu Oct 11 04:54:34 2012&quot;));</PRE>
 
 <P>Inserts a new heartbeat into the given table. The database is specified by a valid
-database handle. Parameters: Database handle, Database table, HB version, HB authkey, HB date
+database handle. Parameters: Database handle, Database table, HB sender, HB version, HB authkey, HB date
 Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
 
 </P><H2><A NAME="HBIsDuplicate">HBIsDuplicate
@@ -192,7 +195,17 @@ Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
 	-The new date time
 	-The HB version
 	-The HB authkey</PRE>
-<H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+<H2><A NAME="getHBDate">getHBDate
+
+</A></H2>
+
+<PRE>	print getHBDate($DBCon,$mysqlCfg-&gt;{'table'},&quot;0.1-dev&quot;,&quot;0123456789a&quot;);</PRE>
+
+<P>Read out the date for the given heartbeat (version,authkey). Returns the date
+as mysql string if succesfully read or undef if the authkey with its version
+is not in the database.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
 
 </A></H1>
 <DL><DT><A NAME="Cannot%20use%20empty%20config%20path%20or%20empty%20section."><CODE>Cannot use empty config path or empty section.</CODE>
@@ -252,11 +265,11 @@ Inserting a heartbeat should only affect 1 row, this error signals
 that the INSERT affected rows != 1.
 
 </DD>
-<DT><A NAME="Warning%3a%20Already%20a%20duplicate%20HB%20in%20DB."><CODE>Warning: Already a duplicate HB in DB.</CODE>
+<DT><A NAME="Warning%20-%20Already%20a%20duplicate%20HB%20in%20DB."><CODE>Warning - Already a duplicate HB in DB.</CODE>
 
 </A></DT>
 <DD>
-Checking for a duplicat heartbeat should return only 1 entry
+Checking for a duplicate heartbeat should return only 1 entry
 when carrying out a SELECT. If SELECT returns more than one entry
 than there is already a duplicate in the database.
 

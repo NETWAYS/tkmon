@@ -1,6 +1,6 @@
 <HTML>
 <HEAD>
-<TITLE>Alert::Handler::Xml</TITLE>
+<TITLE>Alert::Handler::Heartbeat</TITLE>
 </HEAD>
 <BODY BGCOLOR="#ffffff" TEXT="#000000">
 <UL>
@@ -12,21 +12,23 @@
 
 </A><LI><A HREF="#DESCRIPTION">DESCRIPTION
 
-</A><LI><A HREF="#METHODS">METHODS
+</A><LI><A HREF="#METHODS">METHODS 
 
 </A><UL>
-<LI><A HREF="#parseXmlFile">parseXmlFile
+<LI><A HREF="#new">new
 
-</A><LI><A HREF="#parseXmlText">parseXmlText
+</A><LI><A HREF="#_init">_init
 
-</A><LI><A HREF="#getHBVersion">getHBVersion
+</A><LI><A HREF="#xmlRoot">xmlRoot
 
-</A><LI><A HREF="#getHBAuthKey">getHBAuthKey
+</A><LI><A HREF="#version">version
 
-</A><LI><A HREF="#getHBDate">getHBDate
+</A><LI><A HREF="#authkey">authkey
+
+</A><LI><A HREF="#date">date
 
 </A></UL>
-<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+<LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
 
 </A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
 
@@ -42,13 +44,13 @@
 
 </A></H1>
 
-<P>Alert::Handler::Xml - Parse TK monitoring xml files.
+<P>Alert::Handler::Heartbeat - A class to represent a valid heartbeat
 
 </P><H1><A NAME="VERSION">VERSION
 
 </A></H1>
 
-<P>This document describes Alert::Handler::Xml version 0.0.1
+<P>This document describes Alert::Handler::Heartbeat version 0.0.1
 
 </P><H1><A NAME="SYNOPSIS">SYNOPSIS
 
@@ -57,124 +59,94 @@
 <P>Example:
 
 </P>
-<PRE>	my $hb_h = parseXmlFile('HeartbeatTest.xml');
-	print getHBVersion($hb_h).&quot;\n&quot;;
-	print getHBDate($hb_h).&quot;\n&quot;;
-	my $authKey = getHBAuthKey($hb_h);</PRE>
+<PRE>	my $heartbeat = Alert::Handler::Heartbeat-&gt;new(
+		xmlRoot =&gt; $xmlRoot
+	);
+	$tkLogger-&gt;info(&quot;Xml type: &quot;.$tkHandler-&gt;xmlType());
+	$tkLogger-&gt;info(&quot;Mail sender: &quot;.$tkHandler-&gt;sender());
+	
+</PRE>
 <H1><A NAME="DESCRIPTION">DESCRIPTION
 
 </A></H1>
 
-<P>Alert::Handler::Xml parses the defined xml structures. The module is able
-to handle valid heartbeat and alert xmls.
+<P>Alert:.Handler::Heartbeat represents a heartbeat object. The object
+has as main attributes the corresponding information from the heartbeat
+xml. 
 
-</P><H1><A NAME="METHODS">METHODS
+</P><H1><A NAME="METHODS">METHODS 
 
 </A></H1>
-<H2><A NAME="parseXmlFile">parseXmlFile
+<H2><A NAME="new">new
 
 </A></H2>
 
 <P>Example:
 
 </P>
-<PRE>	my $hb_h = parseXmlFile('HeartbeatTest.xml');</PRE>
-
-<P>Parses the xml file, only one parameter is needed - the file path. Returns
-a multi-level hash containing the xml structure.
-
-</P><H2><A NAME="parseXmlText">parseXmlText
-
-</A></H2>
-
-<P>Example:
-
-</P>
-<PRE>	my $hb_h = parseXmlText($xml_str);</PRE>
-
-<P>Parses the given xml string. Returns a multi-level hash containing the xml structure.
-
-</P>
-<P>= getXmlType
-
-</P>
-<P>Example:
-
-</P>
-<PRE>	print getXmlType($hb_h);
+<PRE>	my $heartbeat = Alert::Handler::Heartbeat-&gt;new(
+		xmlRoot =&gt; $xmlRoot
+	);
 	
 </PRE>
 
-<P>Returns the type for the given, parsed xml root $hb_h. The type can be
-'heartbeat' or 'alert'.
+<P>The constructor - creates a Heartbeat object. $xmlRoot is a parsed xml
+reference from XML::Bare and it can be obtained via parseXmlText or
+parseXmlFile from the Alert::Handler::Xml module.
 
-</P><H2><A NAME="getHBVersion">getHBVersion
+</P><H2><A NAME="_init">_init
+
+</A></H2>
+
+<P>Inits the object attributes with the values from the xml root.
+As the xml root is has reference all the values from it must
+be assigned seperately to the heartbeat attributes.
+
+</P><H2><A NAME="xmlRoot">xmlRoot
+
+</A></H2>
+
+<P>Get the xml root respectively the xml hash
+
+</P><H2><A NAME="version">version
 
 </A></H2>
 
 <P>Example:
 
 </P>
-<PRE>	print getHBVersion($hb_h);</PRE>
+<PRE>	print heartbeat()-&gt;version();
+	
+</PRE>
 
-<P>Returns the version tag of the heartbeat xml.
+<P>Get the heartbeat version.
 
-</P><H2><A NAME="getHBAuthKey">getHBAuthKey
-
-</A></H2>
-
-<P>Example:
-
-</P>
-<PRE>	print getHBAuthKey($hb_h);</PRE>
-
-<P>Returns the authkey tag of the heartbeat xml.
-
-</P><H2><A NAME="getHBDate">getHBDate
+</P><H2><A NAME="authkey">authkey
 
 </A></H2>
 
-<P>Example:
+<P>Get the heartbeat auth key.
 
-</P>
-<PRE>	print getHBAuthKey($hb_h);</PRE>
+</P><H2><A NAME="date">date
 
-<P>Returns the date tag (timestamp) of the heartbeat xml.
+</A></H2>
 
-</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+<P>Get the heartbeat date.
+
+</P><H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
 
 </A></H1>
-<DL><DT><A NAME="Could%20not%20parse%20XML%20file."><CODE>Could not parse XML file.</CODE>
 
-</A></DT>
-<DD>
-The given xml file could not be parsed by parseXmlFile.
+<P>Alert::Handler::Heartbeat requires no configuration files.
 
-</DD>
-<DT><A NAME="Could%20not%20parse%20XML%20string."><CODE>Could not parse XML string.</CODE>
-
-</A></DT>
-<DD>
-The given xml string could not be parsed by parseXmlText.
-
-</DD>
-<DT><A NAME="Cannot%20parse%20empty%20xml%20string."><CODE>Cannot parse empty xml string.</CODE>
-
-</A></DT>
-<DD>
-The given xml string to the parsing function is undefined.
-
-</DD>
-</DL>
-<H1><A NAME="DEPENDENCIES">DEPENDENCIES
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
 
 </A></H1>
 
 <PRE>	use warnings;
 	use strict;
 	use Carp;
-	use version;
-	use XML::Bare;</PRE>
+	use version;</PRE>
 <H1><A NAME="AUTHOR">AUTHOR
 
 </A></H1>
