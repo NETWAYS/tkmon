@@ -77,6 +77,10 @@ sub handleHB{
 	my $heartbeat = Alert::Handler::Heartbeat->new(
 		xmlRoot => $self->xml_h()
 	);
+	
+	#check heartbeat xml tags
+	$heartbeat->check();
+	
 	$self->heartbeat($heartbeat);
 	if(valAuthKey($heartbeat->authkey()) ne '200'){
 		$tkLogger->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());

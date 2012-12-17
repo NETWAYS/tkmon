@@ -66,6 +66,7 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 		my $ret = $tkHandler->handleHB();
 	} catch{
 		$tkLogger->emergency("Failed to handle HB with: ".$_);
+		$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
 		exit(1);
 	};
 }

@@ -30,6 +30,16 @@ sub _init{
 	$self->date($xml_h->{heartbeat}->{date}->{value});
 }
 
+sub check{
+	my $self = shift;
+	if(!defined($self->version()) ||
+		!defined($self->authkey()) ||
+		!defined($self->date())){
+			confess("Non valid heartbeat XML detected.");
+		}
+	return;
+}
+
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
