@@ -17,7 +17,7 @@ my $heartbeat = Alert::Handler::Heartbeat->new(
 );
 is(getXmlType($hb_h), 'heartbeat','xml type heartbeat');
 is($heartbeat->version(), '0.1-dev','heartbeat version');
-is($heartbeat->date(), 'Thu Oct 11 04:54:34 2012','heartbeat date');
+is($heartbeat->date(), 'Mon Dec 17 10:19:34 2012','heartbeat date');
 is($heartbeat->authkey(),'0123456789a','heartbeat auth key value');
 
 undef $hb_h;

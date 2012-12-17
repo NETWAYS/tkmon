@@ -107,6 +107,7 @@ sub HBIsDuplicate{
 	} catch{
 		"Failed to get HB date with: ".$_;
 	};
+	
 	#HB is not in table yet
 	if(!defined($fetchedDate)){
 		return 0;

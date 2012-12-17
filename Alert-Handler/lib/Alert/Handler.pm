@@ -8,9 +8,13 @@ use version;
 use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
+use Alert::Handler::Dbase;
+use Alert::Handler::Converters;
 use Alert::Handler::Heartbeat;
 
 our $VERSION = qv('0.0.1');
+
+our $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
 
 our (@ISA, @EXPORT);
 BEGIN {
@@ -26,6 +30,10 @@ sub new{
 	return $self;
 }
 
+sub DESTROY{
+	
+}
+
 sub sender { $_[0]->{sender} = $_[1] if defined $_[1]; $_[0]->{sender} }
 sub receiver { $_[0]->{receiver} = $_[1] if defined $_[1]; $_[0]->{receiver} }
 sub gpgCfg { $_[0]->{gpgCfg} = $_[1] if defined $_[1]; $_[0]->{gpgCfg} }
@@ -35,6 +43,7 @@ sub msgBody { $_[0]->{msgBody} = $_[1] if defined $_[1]; $_[0]->{msgBody} }
 sub xml { $_[0]->{xml} = $_[1] if defined $_[1]; $_[0]->{xml} }
 sub xml_h { $_[0]->{xml_h} = $_[1] if defined $_[1]; $_[0]->{xml_h} }
 sub xmlType { $_[0]->{xmlType} = $_[1] if defined $_[1]; $_[0]->{xmlType} }
+sub heartbeat { $_[0]->{heartbeat} = $_[1] if defined $_[1]; $_[0]->{heartbeat} }
 
 sub parseMsgStr{
 	my $self = shift;
@@ -56,11 +65,29 @@ sub parseXml{
 	$self->xmlType(getXmlType($self->xml_h));
 }
 
+sub initMysql{
+	my $cfgSection = shift;
+	my $cfg = readMysqlCfg($MYSQL_CFG,$cfgSection);
+	my $con = getConnection($cfg);
+	return ($cfg, $con);
+}
+
 sub handleHB{
-	my $xmlRoot = shift;
+	my $self = shift;
 	my $heartbeat = Alert::Handler::Heartbeat->new(
-	xmlRoot => $xmlRoot
+		xmlRoot => $self->xml_h()
 	);
+	$self->heartbeat($heartbeat);
+	
+	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
+	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
+		$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date())) == 1){
+		updateHBDate($DBCon,$mysqlCfg->{'table'},
+			strToMysqlTime($heartbeat->date()),
+			$heartbeat->version(),$heartbeat->authkey());
+		closeConnection($DBCon);
+		return 1;
+	};
 }
 
 

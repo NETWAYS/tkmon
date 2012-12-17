@@ -47,6 +47,7 @@ $debugLogger->add(
 		newline => 1,
 		min_level => 'debug',
 		max_level => 'emergency',
+		callbacks => $LOGADD,
 	)
 );
 
@@ -85,18 +86,31 @@ try{
 	exit(1);
 };
 #Check of which type the xml/mail is
-if(!defined($tkHandler->xmlType())){
-#TODO Log which email from whom has been discarded
+if(!defined($tkHandler->xmlType()) ||
+	( ($tkHandler->xmlType() ne 'heartbeat') &&
+		($tkHandler->xmlType() ne 'alert'))){
 	$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
 	exit(0);	
 }
 if($tkHandler->xmlType() eq 'heartbeat'){
-	$tkHandler->handleHB();
+	try{
+		$tkLogger->info("Xml type: ".$tkHandler->xmlType());
+		if($tkHandler->handleHB() == 1){
+			$tkLogger->info("Found HB duplicate: ".$tkHandler->heartbeat()->authkey());
+		}
+	} catch{
+		$tkLogger->emergency("Failed to handle HB with: ".$_);
+		exit(1);
+	};
 }
 
-$tkLogger->info("Xml type: ".$tkHandler->xmlType());
-$tkLogger->info("Mail sender: ".$tkHandler->sender());
-#$tkLogger->info("HB version: ".getHBVersion($tkHandler->xml_h()));
+#$tkLogger->info("Xml type: ".$tkHandler->xmlType());
+#$tkLogger->info("Mail sender: ".$tkHandler->sender());
+#$tkLogger->info("HB version: ".$tkHandler->heartbeat()->version());
+
+
+
+
 
 
 
