@@ -2,11 +2,8 @@
 use strict;
 use warnings;
 use Try::Tiny;
-#Alert Handler modules to process emails
+
 use Alert::Handler;
-use Alert::Handler::Crypto;
-use Alert::Handler::Email;
-use Alert::Handler::Xml;
 use Alert::Handler::TKLogger;
 
 our $FILTER_DIR = "/etc/postfix/filter";
@@ -70,16 +67,6 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 		exit(1);
 	};
 }
-
-#$tkLogger->info("Xml type: ".$tkHandler->xmlType());
-#$tkLogger->info("Mail sender: ".$tkHandler->sender());
-#$tkLogger->info("HB version: ".$tkHandler->heartbeat()->version());
-
-
-
-
-
-
 
 
 

@@ -52,7 +52,7 @@ sub _init{
 			name => 'to_file',
 			filename => $self->file(),
 			mode => 'append',
-			newline => 1,
+			newline => 0,
 			min_level => $self->level(),
 			max_level => 'emergency',
 			callbacks => $LOGADD,
@@ -64,13 +64,14 @@ sub _init{
 sub info(){
 	my $self = shift;
 	my $msg =shift;
-	$self->logger()->info($msg);
+	#don't want to have a newline for confess etc, add it here
+	$self->logger()->info($msg."\n");
 }
 
 sub emergency(){
 	my $self = shift;
 	my $msg =shift;
-	$self->logger()->emergency($msg);
+	$self->logger()->emergency($msg."\n");
 }
 
 sub cfgPath { $_[0]->{cfgPath} = $_[1] if defined $_[1]; $_[0]->{cfgPath} }
@@ -101,8 +102,27 @@ Example:
 =head1 DESCRIPTION
 
 Alert::Handler::TKLogger uses Log::Dispatch to log to a specified log file.
+It adds a callback to the dispath logger to have a timestamp at each
+logging message.
 
 =head1 METHODS
+
+=head2 new
+
+Example:
+
+	my $tkLogger = Alert::Handler::TKLogger->new(
+		cfgPath => './Logger.cfg'
+	);
+	
+Constructor - creates a new TKLogger object with the given log
+configuration. The configuration defines the path of the log file
+and the desired log level.
+
+= head2 _init
+
+A private function to check the config, read the config
+sections an create the Log::Dispatch object.
 
 =head2 info
 
@@ -110,11 +130,24 @@ Example:
 
 	$tkLogger->info("HB with same timestamp already in DB: ".$heartbeat->authkey());
 
-Calls the info level warning and logs the given message.
+Calls the info level and logs the given message.
+
+=head2 emergency
+
+Example:
+
+	$tkLogger->emergency("Failed to handle HB with: ".$_);
+	
+Calls the emergency level and logs the given message.
 
 =head1 DIAGNOSTICS
 
 =over
+
+=item C<< Cannot use empty config path or empty section >>
+
+The given logger config file path is empty or the section of the
+config is empty.
 
 =item C<< Could not read logger config >>
 
@@ -125,7 +158,8 @@ The given config file could not be parsed correctly.
 =head1 CONFIGURATION AND ENVIRONMENT
 
 Alert::Handler::Validation requires one configuration file to specify 
-the log file and the desired log level.
+the log file and the desired log level. The path to the config file
+must be specified when calling the constructor.
 
 =head1 DEPENDENCIES
 
