@@ -17,7 +17,7 @@ use Alert::Handler::Heartbeat;
 our $VERSION = qv('0.0.1');
 my $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
 my $tkLogger = Alert::Handler::TKLogger->new(
-		cfgPath => './Logger.cfg'
+		cfgPath => '../filter/Logger.cfg'
 	);
 
 our (@ISA, @EXPORT);

@@ -44,6 +44,7 @@ sub _init{
 
 sub check{
 	my $self = shift;
+	#skipping component serial/name as they aren't a must have
 	if(!defined($self->version()) ||
 		!defined($self->authkey()) ||
 		!defined($self->date()) ||
@@ -51,8 +52,6 @@ sub check{
 		!defined($self->hostIP()) ||
 		!defined($self->hostOS()) ||
 		!defined($self->srvSerial()) ||
-		!defined($self->compSerial()) ||
-		!defined($self->compName()) ||
 		!defined($self->srvcName()) ||
 		!defined($self->srvcStatus()) ||
 		!defined($self->srvcOutput()) ||
@@ -63,6 +62,7 @@ sub check{
 	return;
 }
 
+sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
 sub alertHash { $_[0]->{alertHash} = $_[1] if defined $_[1]; $_[0]->{alertHash} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }

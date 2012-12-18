@@ -12,8 +12,7 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseXmlFile parseXmlText getHBVersion getHBAuthKey getHBDate
-	getXmlType); # symbols to export
+	@EXPORT = qw(parseXmlFile parseXmlText getXmlType); # symbols to export
 }
 
 our $HBROOTTAG = "heartbeat";
