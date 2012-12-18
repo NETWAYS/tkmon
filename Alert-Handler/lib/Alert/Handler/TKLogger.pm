@@ -124,6 +124,10 @@ and the desired log level.
 A private function to check the config, read the config
 sections an create the Log::Dispatch object.
 
+=head2 $LOGADD
+
+A callback to add a timestamp to each log message.
+
 =head2 info
 
 Example:
