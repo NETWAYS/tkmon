@@ -8,6 +8,7 @@ use Config::IniFiles;
 use Try::Tiny;
 use version;
 
+use Alert::Handler::Converters;
 use Alert::Handler::Alert;
 
 our $VERSION = qv('0.0.1');
@@ -16,7 +17,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB); # symbols to export
+	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -80,13 +81,13 @@ sub insertHB{
 			Insert INTO $DBTable
 			(Sender_Email, Version, Authkey, Date)
 			VALUES (?, ?, ?, ?)" );
-	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,$HBDate);
+	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate));
 	if($rv != 1){
 		confess "Affected rows for inseting HB returned wrong count.";
 	}
 }
 
-sub insertAlert{
+sub insertAL{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $ALSender = shift;
@@ -104,11 +105,14 @@ sub insertAlert{
 			(Sender_Email, Alert_Hash, Version, Authkey, Date, Host_Name, Host_IP,
 			Host_OS, Srv_Serial, Comp_Serial, Comp_Name, Srvc_Name, Srvc_Status,
 			Srvc_Output, Srvc_Perfdata, Srvc_Duration)
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
-	my $rv = $sth->execute($ALSender,$alert->alertHash(),$alert->version(),$alert->authkey(),$alert->date(),
+			VALUES (?, ?, ?, ?, ?, ?, INET_ATON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+	my $rv = $sth->execute($ALSender,$alert->alertHash(),$alert->version(),$alert->authkey(),strToMysqlTime($alert->date()),
 			$alert->hostName(),$alert->hostIP(),$alert->hostOS(),$alert->srvSerial(),$alert->compSerial(),
 			$alert->compName(),$alert->srvcName(),$alert->srvcStatus(),$alert->srvcOutput(),
 			$alert->srvcPerfdata(),$alert->srvcDuration());
+	if($rv != 1){
+		confess "Affected rows for inseting AL returned wrong count.";
+	}
 }
 
 sub HBIsDuplicate{
@@ -167,7 +171,7 @@ sub updateHBDate{
 			SET Date = ?
 			WHERE Version = ?
 			AND Authkey = ?" );
-	my $rv = $sth->execute($newDate,$HBVersion,$HBAuthkey);
+	my $rv = $sth->execute(strToMysqlTime($newDate),$HBVersion,$HBAuthkey);
 	if($rv != 1){
 		confess "Affected rows for updating HB Date returned wrong count.";
 	}
@@ -194,7 +198,7 @@ sub getHBDateDB{
 	if($sth->rows == 0){
 		return undef;
 	}
-	#mor than 1 HB - duplicate checking has not worked correctly 
+	#more than 1 HB - duplicate checking has not worked correctly 
 	if($sth->rows != 1){
 		croak "Warning - Already a duplicate HB in DB.";
 	}
@@ -203,6 +207,64 @@ sub getHBDateDB{
 	$sth->fetch;
 	return $fetchedDate;
 }
+
+sub ALIsDuplicate{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $alert = shift;
+	
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	#now check if Alert differs
+	my ($fetchedDate,$fetchedStatus) = try{
+		getALDateDB($DB,$DBTable,$alert);
+	} catch{
+		"Failed to get AL values from DB with: ".$_;
+	};
+	
+	#AL is not in table yet
+	if(!defined($fetchedDate)){
+		return 0;
+	}
+}
+
+sub getALValsDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $alert = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			SELECT Alert_Hash, Date, Srvc_Status
+			FROM $DBTable
+			WHERE Alert_Hash = ?" );
+	my $rv = $sth->execute($alert->alertHash());
+	#the alert is not in the table yet
+	if($sth->rows == 0){
+		return undef;
+	}
+	#more than 1 Alert - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		croak "Warning - Already a duplicate AL in DB.";
+	}
+	my ($fetchedDate, $fetchedStatus);
+	$rv = $sth->bind_colums(undef,\$fetchedDate,\$fetchedStatus);
+	$sth->fetch;
+	return ($fetchedDate,$fetchedStatus);
+}
+
+
+
+
+
 
 1; # Magic true value required at end of module
 __END__

@@ -48,10 +48,10 @@ sub _init{
 
 sub _genHash{
 	my $self = shift;
-	my $toHash = $self->srvSerial().$self->srvcName().$self->srvcStatus();
+	my $toHash = $self->srvSerial().$self->srvcName().$self->hostName();
 	my $hash = Digest::SHA->new("sha512");
 	$hash->add($toHash);
-	$self->alertHash($hash->hexdigest());
+	$self->alertHash($hash->digest());
 }
 
 

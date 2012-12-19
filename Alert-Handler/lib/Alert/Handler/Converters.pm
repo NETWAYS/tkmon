@@ -12,7 +12,7 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(strToDateTime DateTimeToMysql strToMysqlTime); # symbols to export
+	@EXPORT = qw(strToDateTime DateTimeToMysql strToMysqlTime DateTimeToStr mysqlToDateTime); # symbols to export
 }
 
 sub strToDateTime{
@@ -44,6 +44,31 @@ sub strToMysqlTime{
 	}
 	my $dt = strToDateTime($dateStr);
 	return DateTimeToMysql($dt);
+}
+
+sub DateTimeToStr{
+	my $dt = shift;
+	if(!defined($dt)){
+		confess "Cannot use undefined date time object.";
+	}
+	return $dt->strftime('%a %b %d %H:%M:%S %Y');
+}
+
+sub mysqlToDateTime{
+	my $dateStr = shift;
+	if(!defined($dateStr)){
+		confess "Cannot use undefined date string.";
+	}	
+	my $strp = DateTime::Format::Strptime->new(
+		pattern   => '%F %H:%M:%S',
+ 		on_error  => 'croak',
+	);
+	
+	return $strp->parse_datetime($dateStr);
+}
+
+sub dateDiffToHours{
+	
 }
 
 1; # Magic true value required at end of module

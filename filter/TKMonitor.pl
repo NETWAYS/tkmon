@@ -67,7 +67,16 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 		exit(1);
 	};
 }
-
+if($tkHandler->xmlType() eq 'alert'){
+	try{
+		$tkLogger->info("Xml type: ".$tkHandler->xmlType());
+		my $ret = $tkHandler->handleAL();
+	} catch{
+		$tkLogger->emergency("Failed to handle AL with: ".$_);
+		$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
+		exit(1);
+	};
+}
 
 
 __END__

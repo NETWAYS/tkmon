@@ -28,9 +28,10 @@ sub _init{
 	$self->version($xml_h->{heartbeat}->{version}->{value});
 	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
 	$self->date($xml_h->{heartbeat}->{date}->{value});
+	$self->_check();
 }
 
-sub check{
+sub _check{
 	my $self = shift;
 	if(!defined($self->version()) ||
 		!defined($self->authkey()) ||

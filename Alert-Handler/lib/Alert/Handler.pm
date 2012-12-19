@@ -9,10 +9,10 @@ use Alert::Handler::Crypto;
 use Alert::Handler::Email;
 use Alert::Handler::Xml;
 use Alert::Handler::Dbase;
-use Alert::Handler::Converters;
 use Alert::Handler::Validation;
 use Alert::Handler::TKLogger;
 use Alert::Handler::Heartbeat;
+use Alert::Handler::Alert;
 
 our $VERSION = qv('0.0.1');
 my $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
@@ -44,6 +44,7 @@ sub xml { $_[0]->{xml} = $_[1] if defined $_[1]; $_[0]->{xml} }
 sub xml_h { $_[0]->{xml_h} = $_[1] if defined $_[1]; $_[0]->{xml_h} }
 sub xmlType { $_[0]->{xmlType} = $_[1] if defined $_[1]; $_[0]->{xmlType} }
 sub heartbeat { $_[0]->{heartbeat} = $_[1] if defined $_[1]; $_[0]->{heartbeat} }
+sub alert { $_[0]->{alert} = $_[1] if defined $_[1]; $_[0]->{alert} }
 
 sub parseMsgStr{
 	my $self = shift;
@@ -78,9 +79,6 @@ sub handleHB{
 		xmlRoot => $self->xml_h()
 	);
 	
-	#check heartbeat xml tags
-	$heartbeat->check();
-	
 	$self->heartbeat($heartbeat);
 	if(valAuthKey($heartbeat->authkey()) ne '200'){
 		$tkLogger->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());
@@ -93,14 +91,14 @@ sub handleHB{
 	#found a duplicate
 	if($ret == 1){
 		updateHBDate($DBCon,$mysqlCfg->{'table'},
-			strToMysqlTime($heartbeat->date()),
+			$heartbeat->date(),
 			$heartbeat->version(),$heartbeat->authkey());
 		$tkLogger->info("Found HB duplicate: ".$heartbeat->authkey());
 	}
 	#HB not in DB
 	if($ret == 0){
 		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
-			$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
+			$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
 		$tkLogger->info("Inserted new HB in DB: ".$heartbeat->authkey());
 	}
 	if($ret == -1){
@@ -109,6 +107,37 @@ sub handleHB{
 	closeConnection($DBCon);
 	return;
 }
+
+sub handleAL{
+	my $self = shift;
+	my $alert = Alert::Handler::Alert->new(
+		xmlRoot => $self->xml_h()
+	);
+	
+	$self->alert($alert);
+	#call REST to check if auth key is valid
+#	my $checkAuth = valAuthKey($alert->authkey(),$alert->srvSerial());
+#	if($checkAuth eq '402'){
+#		$tkLogger->info("Payment required for ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
+#		return;
+#	}
+#	if($checkAuth eq '403'){
+#		$tkLogger->info("Not a valid auth/serial combi: ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
+#		return;
+#	}
+	my ($mysqlCfg,$DBCon) = initMysql('alerts');
+	my $ret;
+	$ret = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
+	#AL not in DB
+	if($ret == 0){
+		insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
+		$tkLogger->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
+	}
+	closeConnection($DBCon);
+	return;
+}
+
+
 1; # Magic true value required at end of module
 __END__
 
@@ -199,6 +228,10 @@ Get/set the type of the xml - heartbeat or alert.
 =head2 heartbeat
 
 Get/set the heartbeat attribute.
+
+=head2 alert
+
+Get/set the alert attribute.
 
 =head2 parseMsgStr
 

@@ -1,0 +1,62 @@
+Return-Path: gschoenberger@thomas-krenn.com
+Received: from zimbra.thomas-krenn.com (LHLO zimbra.thomas-krenn.com)
+ (127.0.1.1) by zimbra.thomas-krenn.com with LMTP; Tue, 6 Nov 2012 13:16:43
+ +0100 (CET)
+Received: from localhost (localhost [127.0.0.1])
+	by zimbra.thomas-krenn.com (Postfix) with ESMTP id 923C56FC138
+	for <gschoenberger@thomas-krenn.com>; Tue,  6 Nov 2012 13:16:43 +0100 (CET)
+X-Virus-Scanned: amavisd-new at thomas-krenn.com
+X-Spam-Flag: NO
+X-Spam-Score: -0.239
+X-Spam-Level: 
+X-Spam-Status: No, score=-0.239 tagged_above=-10 required=6.6
+	tests=[BAYES_00=-1.9, HELO_NO_DOMAIN=0.001, RDNS_NONE=0.793,
+	TO_EQ_FM_DIRECT_MX=0.867] autolearn=no
+Received: from zimbra.thomas-krenn.com ([127.0.0.1])
+	by localhost (zimbra.thomas-krenn.com [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id cgR5aosvPYpJ for <gschoenberger@thomas-krenn.com>;
+	Tue,  6 Nov 2012 13:16:41 +0100 (CET)
+Received: from zimbra.thomas-krenn.com (zimbra.thomas-krenn.com [127.0.1.1])
+	by zimbra.thomas-krenn.com (Postfix) with ESMTP id 6EF996FC156
+	for <gschoenberger@thomas-krenn.com>; Tue,  6 Nov 2012 13:16:41 +0100 (CET)
+Date: Tue, 6 Nov 2012 13:16:41 +0100 (CET)
+From: Georg =?utf-8?Q?Sch=C3=B6nberger?= <gschoenberger@thomas-krenn.com>
+To: Georg =?utf-8?Q?Sch=C3=B6nberger?= <gschoenberger@thomas-krenn.com>
+Message-ID: <1950936504.549872.1352204201347.JavaMail.root@thomas-krenn.com>
+Subject: Test Heartbeat
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+X-Originating-IP: [91.223.201.22]
+X-Mailer: Zimbra 7.2.0_GA_2669 (ZimbraWebClient - FF3.0 (Linux)/7.2.0_GA_2669)
+
+-----BEGIN PGP MESSAGE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+hQIMA3PXLKYDOkm5ARAAjTlUOedXzD8bEX9tl/UOHvQYpZ959bPsMcSpwO2BXw+R
+DL4frTOkdCqaTih38RS4bkQwXR7jdSDs411LH1LvQPa/XQxE5kMJdKx2eq2KV5CP
+1SCouM66P+6NbGeO6cvJTo43beJBf5wi4HpcQgMW2bE/SIAIKF7BTmzA9IP7zVQx
+WJX6Oh2hFwwj0x4gEUmjS0GeRW6UsNlj3CWANF3JWezJz6sjw5bRZDNE6AlljEtc
+7jzGlulgKmbIs1apiW464o6oUzLvXe3kfa8PT3C3+Th6ar9Vs9mQAWQU+v07bq/Y
+1AyVt0vPCDj1+PlzFqKQ+bNIc2cUXbNoOQGVFPogwyest0tELwL7Y/OWJZiq6RG8
+q5KRbeXzV+UaUdaAk2zDS+vAvTLKoWEaa1Ytux7qtElzSenI3xFIh4nZ6CKD4svX
+3QuihGETKUCRfn1MYwkmiTWJ6XAQ+pMRpEkNHlf2ZdprAKbWg2KYxTz2716/QxRI
++l1G37XnWFmx5cJ10U7DwVmjdwweHQeT5fG1RKIDLVP+pg3qRF/nLLeiCWotfIfe
+H8A5ZmkuVEGQ8+gF+TPNX5B10jyPIPeAQmqLLayUn4MDsDhSPlMOy5uBHpK3U/XB
+28Khczp7janNsRU2wBZQm4Fj2mOzp6sDSpr7hdy6aveCgaz7prFotMEZNLxdY8bS
+6QES+kC+zEzq9f7OgRt3I7H5Ph3YYqsOeE3I/xg6IObbtiTQSJsHscd/JTXwguc4
+AdAdZFsvwgQhBOwWp5dlQ2e+lDlyyvAzmFDDWD++zhsbeyk5tuBpZWteTJMC7W6l
+u4BkRzM/Sxe6U5c/TX89Eje+KDbCslSESnxKBhcLrSrXndc4VuWWDIqdH5/9ot5i
+hbyEP8RCLPFGbFTjujNoJdXOgCkFk+mqdpldExt2pA+tsOkT0ZCGqLyswqhl8tLA
+VbAHjxaX5PmxmAqZMekpNDx3VigDTQ0Xb98qFY4/D/ANexsApW7sK2T0fdT05xve
+8Y9zdSfCP9V636TCTKZLGWSIg1SDzuMrH9m+jQ+mP0dpisRc20xo5/r4ZYNmrlkO
+iDF8awqtU2vtf/su6v5MZZvTyG4jgwCp3rVwHZpemz7wsLABL8wQcKzrrD0hZYyQ
+YFqWy21oLktnbMwOD8yPXtroCfYFr+es8uyGmuNw828hDX+t9DsM7CpfuKWQYNV5
+kjEJdV2ElsUQauKQaKCE00abKbPiRhKeMkTwVcDtdwSLH63m3GsV4gUj3QbMnUhv
+8UyC8h1a+Ec4TWA6lTTZYiDtacdCBH1m1gvx7MfbbnlN/WotcICdQ/HZiBtpnUtb
+2hlMI2Daw6TFjLGlP3GK/MpdX+3qtCMfS3XgvmgJ1fXonsYYdeJJRJKr9p5AtRtg
+31Tr1HSKXBVvjfW30jmT1ojLu7K4EmYTby8nAW4DsA96W5R3sgeitQp1s/qW2eAZ
+JTek5XV0yQ5MRMkzNp9HZL/S6c0UCULr4gJY2qmd2K4pQbRjgUTIm8Gh4CuCv70J
++xKItngkoZvAh4BxD8JeEgeKwxwiFJ0IAjgagvYk9GldeW2e/ZZK+VT03dpKOavW
+=d9cJ
+-----END PGP MESSAGE-----

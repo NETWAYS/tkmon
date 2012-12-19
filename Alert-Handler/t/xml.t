@@ -105,7 +105,7 @@ $output = "'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0
 is($alert->srvcPerfdata(),$output, 'alert service perfdata output');
 is($alert->srvcDuration(),'1.196 seconds','alert service duration');
 
-is($alert->alertHash(),'428d2c76550a871789f5a9771266e363f1460c0ba7d710e0961e5731928016591a01b11098c75f2be9a4855b725f2bd8fcab471f34d4133e4c1fa5ba69f7680f','alert sha512 hash');
+is(unpack("H*",$alert->alertHash()),'4a5e560b1377603a2107c3b8bde60237a15a501c3c98f2e5c35454ef63963e9344cf284c07daad1548da36fa28174f03b82e46d3bab8deb182de9781ce375a53','alert sha512 hash');
 
 
 
