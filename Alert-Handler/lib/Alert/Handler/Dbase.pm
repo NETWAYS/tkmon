@@ -17,7 +17,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate); # symbols to export
+	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -230,19 +230,21 @@ sub ALIsDuplicate{
 	if(!defined($fetchedDate)){
 		return 0;
 	}
-	#AL is in the table, status and date differs
+	#AL is in the table, date differs
 	if(($alert->srvcStatus() eq $fetchedStatus) &&
 		($fetchedDate ne strToMysqlTime($alert->date() ) )){
 		return 1;
+	}
+	#TODO Check also if date differs?
+	#AL is in the table, status and date differs
+	if($alert->srvcStatus() ne $fetchedStatus){
+		return (2,$fetchedStatus);
 	}
 	#AL is in table, with same timestamp, this should rather be rare
 	if( ($alert->srvcStatus() eq $fetchedStatus) &&
 		( $fetchedDate eq strToMysqlTime($alert->date()) ) ){
 		return -1;
 	}
-	
-	
-	
 }
 
 sub getALValsDB{
@@ -314,7 +316,25 @@ sub updateALDate{
 	}
 }
 
-
+sub updateALStatus{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $alert = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			UPDATE $DBTable
+			SET Srvc_Status = ?
+			WHERE Alert_Hash = ?");
+	my $rv = $sth->execute($alert->srvcStatus(),$alert->alertHash());
+	if($rv != 1){
+		confess "Affected rows for updating AL status returned wrong count.";
+	}
+}
 
 1; # Magic true value required at end of module
 __END__

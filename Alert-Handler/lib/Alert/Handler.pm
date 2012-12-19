@@ -126,12 +126,27 @@ sub handleAL{
 #		return;
 #	}
 	my ($mysqlCfg,$DBCon) = initMysql('alerts');
-	my $ret;
-	$ret = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
+	
+	#TODO Check when an email must be sent
+	
+	my ($ret,$fetchedStatus) = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
 	#found a duplicate
 	if($ret == 1){
 		updateALDate($DBCon,$mysqlCfg->{'table'},$alert);
 		$tkLogger->info("Found AL duplicate: ".$self->sender().', '.$alert->authkey());
+	}
+	#status differs, check if it is a recover
+	if($ret == 2){
+		#this is a recover, drop entry from duplicate DB
+		if($alert->srvcStatus() eq 'OK' && $fetchedStatus ne 'OK'){
+			delALDB($DBCon,$mysqlCfg->{'table'},$alert);
+			$tkLogger->info("Deleting AL due to recover: ".$self->sender().', '.$alert->authkey());
+		}
+		else{
+			#update the new status, keep entry
+			updateALStatus($DBCon,$mysqlCfg->{'table'},$alert);
+			$tkLogger->info("Updating AL status: ".$self->sender().', '.$alert->authkey());
+		}
 	}
 	#AL not in DB
 	if($ret == 0){

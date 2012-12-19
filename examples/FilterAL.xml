@@ -10,7 +10,7 @@
 	</host>
 	<service>
 		<name>IPMI</name>
-		<status>Warning</status>
+		<status>OK</status>
 		<plugin-output>IPMI Status: OK
 System Temp = 29.00 (Status: Warning)
 Peripheral Temp = 38.00 (Status: Nominal)
