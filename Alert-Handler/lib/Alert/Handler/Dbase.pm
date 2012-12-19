@@ -8,6 +8,8 @@ use Config::IniFiles;
 use Try::Tiny;
 use version;
 
+use Alert::Handler::Alert;
+
 our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
 BEGIN {
@@ -82,6 +84,31 @@ sub insertHB{
 	if($rv != 1){
 		confess "Affected rows for inseting HB returned wrong count.";
 	}
+}
+
+sub insertAlert{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $ALSender = shift;
+	my $alert = shift;
+	
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	$alert->check();
+	my $sth = $DB->prepare( "
+			Insert INTO $DBTable
+			(Sender_Email, Alert_Hash, Version, Authkey, Date, Host_Name, Host_IP,
+			Host_OS, Srv_Serial, Comp_Serial, Comp_Name, Srvc_Name, Srvc_Status,
+			Srvc_Output, Srvc_Perfdata, Srvc_Duration)
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+	my $rv = $sth->execute($ALSender,$alert->alertHash(),$alert->version(),$alert->authkey(),$alert->date(),
+			$alert->hostName(),$alert->hostIP(),$alert->hostOS(),$alert->srvSerial(),$alert->compSerial(),
+			$alert->compName(),$alert->srvcName(),$alert->srvcStatus(),$alert->srvcOutput(),
+			$alert->srvcPerfdata(),$alert->srvcDuration());
 }
 
 sub HBIsDuplicate{

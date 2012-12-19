@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 23;
+use Test::More tests => 24;
 
 use Alert::Handler::Xml;
 use Alert::Handler::Heartbeat;
@@ -104,6 +104,9 @@ is($alert->srvcOutput(),$output, 'alert service output');
 $output = "'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38";
 is($alert->srvcPerfdata(),$output, 'alert service perfdata output');
 is($alert->srvcDuration(),'1.196 seconds','alert service duration');
+
+is($alert->alertHash(),'428d2c76550a871789f5a9771266e363f1460c0ba7d710e0961e5731928016591a01b11098c75f2be9a4855b725f2bd8fcab471f34d4133e4c1fa5ba69f7680f','alert sha512 hash');
+
 
 
 

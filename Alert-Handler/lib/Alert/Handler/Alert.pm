@@ -4,6 +4,7 @@ use warnings;
 use strict;
 use Carp;
 use version;
+use Digest::SHA qw(sha512);
 
 our $VERSION = qv('0.0.1');
 
@@ -40,7 +41,19 @@ sub _init{
 	$self->srvcPerfdata($xml_h->{alert}->{service}->{perfdata}->{value});
 	$self->srvcDuration($xml_h->{alert}->{service}->{duration}->{value});
 	
+	#generate the hash and check the xml if it is valid
+	$self->check();
+	$self->_genHash();
 }
+
+sub _genHash{
+	my $self = shift;
+	my $toHash = $self->srvSerial().$self->srvcName().$self->srvcStatus();
+	my $hash = Digest::SHA->new("sha512");
+	$hash->add($toHash);
+	$self->alertHash($hash->hexdigest());
+}
+
 
 sub check{
 	my $self = shift;
