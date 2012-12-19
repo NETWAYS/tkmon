@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <alert version="0.1-dev">
 	<authkey category="Monitoring">0123456789a</authkey>
-	<date>Thu Oct 11 04:54:34 2012</date>
+	<date>Thu Oct 11 16:54:34 2012</date>
 	<host>
 		<name>tktest-host</name>
 		<ip>192.168.1.1</ip>

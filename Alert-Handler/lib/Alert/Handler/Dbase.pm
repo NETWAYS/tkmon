@@ -17,7 +17,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB); # symbols to export
+	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -145,11 +145,11 @@ sub HBIsDuplicate{
 		return 0;
 	}
 	#HB is in table, timestamp differs from given
-	if($fetchedDate ne $HBDate){
+	if($fetchedDate ne strToMysqlTime($HBDate)){
 		return 1;
 	}
 	#HB is in table, with same timestamp, this should rather be rare
-	if($fetchedDate eq $HBDate){
+	if($fetchedDate eq strToMysqlTime($HBDate)){
 		return -1;
 	}
 }
@@ -221,7 +221,7 @@ sub ALIsDuplicate{
 	}
 	#now check if Alert differs
 	my ($fetchedDate,$fetchedStatus) = try{
-		getALDateDB($DB,$DBTable,$alert);
+		getALValsDB($DB,$DBTable,$alert);
 	} catch{
 		"Failed to get AL values from DB with: ".$_;
 	};
@@ -230,6 +230,19 @@ sub ALIsDuplicate{
 	if(!defined($fetchedDate)){
 		return 0;
 	}
+	#AL is in the table, status and date differs
+	if(($alert->srvcStatus() eq $fetchedStatus) &&
+		($fetchedDate ne strToMysqlTime($alert->date() ) )){
+		return 1;
+	}
+	#AL is in table, with same timestamp, this should rather be rare
+	if( ($alert->srvcStatus() eq $fetchedStatus) &&
+		( $fetchedDate eq strToMysqlTime($alert->date()) ) ){
+		return -1;
+	}
+	
+	
+	
 }
 
 sub getALValsDB{
@@ -256,13 +269,50 @@ sub getALValsDB{
 		croak "Warning - Already a duplicate AL in DB.";
 	}
 	my ($fetchedDate, $fetchedStatus);
-	$rv = $sth->bind_colums(undef,\$fetchedDate,\$fetchedStatus);
+	$rv = $sth->bind_col(2,\$fetchedDate);
+	$rv = $sth->bind_col(3,\$fetchedStatus);
 	$sth->fetch;
 	return ($fetchedDate,$fetchedStatus);
 }
 
+sub delALDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $alert = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			DELETE FROM $DBTable
+			WHERE Alert_Hash = ?" );
+	my $rv = $sth->execute($alert->alertHash());
+	if($rv != 1){
+		confess "Affected rows for deleting AL returned wrong count.";
+	}
+}
 
-
+sub updateALDate{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $alert = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+	my $sth = $DB->prepare( "
+			UPDATE $DBTable
+			SET Date = ?
+			WHERE Alert_Hash = ?");
+	my $rv = $sth->execute(strToMysqlTime($alert->date()),$alert->alertHash());
+	if($rv != 1){
+		confess "Affected rows for updating AL Date returned wrong count.";
+	}
+}
 
 
 

@@ -87,7 +87,7 @@ sub handleHB{
 	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
 	my $ret;
 	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
-		$heartbeat->version(),$heartbeat->authkey(),strToMysqlTime($heartbeat->date()));
+		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
 	#found a duplicate
 	if($ret == 1){
 		updateHBDate($DBCon,$mysqlCfg->{'table'},
@@ -128,10 +128,18 @@ sub handleAL{
 	my ($mysqlCfg,$DBCon) = initMysql('alerts');
 	my $ret;
 	$ret = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
+	#found a duplicate
+	if($ret == 1){
+		updateALDate($DBCon,$mysqlCfg->{'table'},$alert);
+		$tkLogger->info("Found AL duplicate: ".$self->sender().', '.$alert->authkey());
+	}
 	#AL not in DB
 	if($ret == 0){
 		insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
 		$tkLogger->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
+	}
+	if($ret == -1){
+		$tkLogger->info("AL with same timestamp already in DB: ".$self->sender().', '.$alert->authkey());
 	}
 	closeConnection($DBCon);
 	return;
