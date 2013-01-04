@@ -24,12 +24,14 @@ while(<STDIN>){
 
 #Setup up the Handler and decrypt the email
 my $tkHandler = Alert::Handler->new(
-	sender => $ARGV[0]
+	sender => $ARGV[0],
+	gpgCfg =>'../gnupg/GpgConfig.cfg',
+	mysqlCfg => '../mysql/MysqlConfig.cfg',
+	logCfg => '../filter/Logger.cfg'
 );
 try{
 	$tkHandler->msg_str($msg_str);
 	$tkHandler->parseMsgStr();
-	$tkHandler->gpgCfg('../gnupg/GpgConfig.cfg');
 	$tkHandler->decryptXml();
 } catch{
 	$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);

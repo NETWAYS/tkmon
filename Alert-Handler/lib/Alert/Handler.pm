@@ -15,10 +15,6 @@ use Alert::Handler::Heartbeat;
 use Alert::Handler::Alert;
 
 our $VERSION = qv('0.0.1');
-my $MYSQL_CFG = '../mysql/MysqlConfig.cfg';
-my $tkLogger = Alert::Handler::TKLogger->new(
-		cfgPath => '../filter/Logger.cfg'
-	);
 
 our (@ISA, @EXPORT);
 BEGIN {
@@ -30,13 +26,28 @@ BEGIN {
 sub new{
 	my $class = shift;
 	my $self = {@_};
-	bless ($self,$class	);
+	bless ($self,$class);
+	$self->_init();
 	return $self;
+}
+
+sub _init{
+	my $self = shift;
+	if(!defined($self->logCfg())){
+		confess "Cannot use empty config path as logCfg."
+	}
+	my $tkLogger = Alert::Handler::TKLogger->new(
+		cfgPath => $self->logCfg()
+	);
+	$self->logger($tkLogger);
 }
 
 sub sender { $_[0]->{sender} = $_[1] if defined $_[1]; $_[0]->{sender} }
 sub receiver { $_[0]->{receiver} = $_[1] if defined $_[1]; $_[0]->{receiver} }
 sub gpgCfg { $_[0]->{gpgCfg} = $_[1] if defined $_[1]; $_[0]->{gpgCfg} }
+sub mysqlCfg { $_[0]->{mysqlCfg} = $_[1] if defined $_[1]; $_[0]->{mysqlCfg} }
+sub logCfg { $_[0]->{logCfg} = $_[1] if defined $_[1]; $_[0]->{logCfg} }
+sub logger { $_[0]->{logger} = $_[1] if defined $_[1]; $_[0]->{logger} }
 sub msg_str { $_[0]->{msg_str} = $_[1] if defined $_[1]; $_[0]->{msg_str} }
 sub msg { $_[0]->{msg} = $_[1] if defined $_[1]; $_[0]->{msg} }
 sub msgBody { $_[0]->{msgBody} = $_[1] if defined $_[1]; $_[0]->{msgBody} }
@@ -45,6 +56,7 @@ sub xml_h { $_[0]->{xml_h} = $_[1] if defined $_[1]; $_[0]->{xml_h} }
 sub xmlType { $_[0]->{xmlType} = $_[1] if defined $_[1]; $_[0]->{xmlType} }
 sub heartbeat { $_[0]->{heartbeat} = $_[1] if defined $_[1]; $_[0]->{heartbeat} }
 sub alert { $_[0]->{alert} = $_[1] if defined $_[1]; $_[0]->{alert} }
+
 
 sub parseMsgStr{
 	my $self = shift;
@@ -67,8 +79,9 @@ sub parseXml{
 }
 
 sub initMysql{
+	my $self = shift;
 	my $cfgSection = shift;
-	my $cfg = readMysqlCfg($MYSQL_CFG,$cfgSection);
+	my $cfg = readMysqlCfg($self->mysqlCfg(),$cfgSection);
 	my $con = getConnection($cfg);
 	return ($cfg, $con);
 }
@@ -81,10 +94,10 @@ sub handleHB{
 	
 	$self->heartbeat($heartbeat);
 	if(valAuthKey($heartbeat->authkey()) ne '200'){
-		$tkLogger->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());
+		$self->logger()->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());
 		return;
 	}
-	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
+	my ($mysqlCfg,$DBCon) = $self->initMysql('heartbeats');
 	my $ret;
 	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
 		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
@@ -93,16 +106,16 @@ sub handleHB{
 		updateHBDate($DBCon,$mysqlCfg->{'table'},
 			$heartbeat->date(),
 			$heartbeat->version(),$heartbeat->authkey());
-		$tkLogger->info("Found HB duplicate: ".$heartbeat->authkey());
+		$self->logger()->info("Found HB duplicate: ".$heartbeat->authkey());
 	}
 	#HB not in DB
 	if($ret == 0){
 		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
 			$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
-		$tkLogger->info("Inserted new HB in DB: ".$heartbeat->authkey());
+		$self->logger()->info("Inserted new HB in DB: ".$heartbeat->authkey());
 	}
 	if($ret == -1){
-		$tkLogger->info("HB with same timestamp already in DB: ".$heartbeat->authkey());
+		$self->logger()->info("HB with same timestamp already in DB: ".$heartbeat->authkey());
 	}
 	closeConnection($DBCon);
 	return;
@@ -125,7 +138,7 @@ sub handleAL{
 #		$tkLogger->info("Not a valid auth/serial combi: ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
 #		return;
 #	}
-	my ($mysqlCfg,$DBCon) = initMysql('alerts');
+	my ($mysqlCfg,$DBCon) = $self->initMysql('alerts');
 	
 	#TODO Check when an email must be sent
 	
@@ -133,28 +146,28 @@ sub handleAL{
 	#found a duplicate
 	if($ret == 1){
 		updateALDate($DBCon,$mysqlCfg->{'table'},$alert);
-		$tkLogger->info("Found AL duplicate: ".$self->sender().', '.$alert->authkey());
+		$self->logger()->info("Found AL duplicate: ".$self->sender().', '.$alert->authkey());
 	}
 	#status differs, check if it is a recover
 	if($ret == 2){
 		#this is a recover, drop entry from duplicate DB
 		if($alert->srvcStatus() eq 'OK' && $fetchedStatus ne 'OK'){
 			delALDB($DBCon,$mysqlCfg->{'table'},$alert);
-			$tkLogger->info("Deleting AL due to recover: ".$self->sender().', '.$alert->authkey());
+			$self->logger()->info("Deleting AL due to recover: ".$self->sender().', '.$alert->authkey());
 		}
 		else{
 			#update the new status, keep entry
 			updateALStatus($DBCon,$mysqlCfg->{'table'},$alert);
-			$tkLogger->info("Updating AL status: ".$self->sender().', '.$alert->authkey());
+			$self->logger()->info("Updating AL status: ".$self->sender().', '.$alert->authkey());
 		}
 	}
 	#AL not in DB
 	if($ret == 0){
 		insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
-		$tkLogger->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
+		$self->logger()->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
 	}
 	if($ret == -1){
-		$tkLogger->info("AL with same timestamp already in DB: ".$self->sender().', '.$alert->authkey());
+		$self->logger()->info("AL with same timestamp already in DB: ".$self->sender().', '.$alert->authkey());
 	}
 	closeConnection($DBCon);
 	return;
