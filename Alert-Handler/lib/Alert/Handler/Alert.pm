@@ -52,8 +52,10 @@ sub _genHash{
 	my $hash = Digest::SHA->new("sha512");
 	$hash->add($toHash);
 	$self->alertHash($hash->digest());
+	if(!defined($self->alertHash())){
+		confess("Digest function returned an undefined value.");
+	}
 }
-
 
 sub check{
 	my $self = shift;
@@ -98,26 +100,27 @@ __END__
 
 =head1 NAME
 
-Alert::Handler::Heartbeat - A class to represent a valid heartbeat
+Alert::Handler::Alert - A class to represent a valid notification alert
 
 =head1 VERSION
 
-This document describes Alert::Handler::Heartbeat version 0.0.1
+This document describes Alert::Handler::Alert version 0.0.1
 
 =head1 SYNOPSIS
 
 Example:
 
-	my $heartbeat = Alert::Handler::Heartbeat->new(
-		xmlRoot => $xmlRoot
+	$hb_h = parseXmlFile('../examples/FilterAL.xml');
+	my $alert = Alert::Handler::Alert->new(
+		xmlRoot => $hb_h
 	);
-	$tkLogger->info("Xml type: ".$tkHandler->xmlType());
-	$tkLogger->info("Mail sender: ".$tkHandler->sender());
+	$tkLogger->info("Xml type: ".getXmlType($hb_h));
+	$tkLogger->info("Version: ".$alert->version());
 	
 =head1 DESCRIPTION
 
-Alert:.Handler::Heartbeat represents a heartbeat object. The object
-has as main attributes the corresponding information from the heartbeat
+Alert:.Handler::Alert represents an alert object. The object
+has as main attributes the corresponding information from the alert
 xml. 
 
 =head1 METHODS 
@@ -126,43 +129,138 @@ xml.
 
 Example:
 
-	my $heartbeat = Alert::Handler::Heartbeat->new(
-		xmlRoot => $xmlRoot
+	my $alert = Alert::Handler::Alert->new(
+		xmlRoot => $hb_h
 	);
 	
-The constructor - creates a Heartbeat object. $xmlRoot is a parsed xml
+The constructor - creates an alert object. $xmlRoot is a parsed xml
 reference from XML::Bare and it can be obtained via parseXmlText or
 parseXmlFile from the Alert::Handler::Xml module.
 
 =head2 _init
 
 Inits the object attributes with the values from the xml root.
-As the xml root is has reference all the values from it must
-be assigned seperately to the heartbeat attributes.
+As the xml root has hash references all the values from it must
+be assigned seperately to the alert attributes. Moreover _init
+checks if all values are defined and throws an exception if any
+value is undefined (except component serial or name, as they can
+be NULL).
+Finally _init generates a unique hash value (currently
+SHA512) out of "srvSerial + srvcName + hostName" to detect duplicates
+in the database.
+
+
+=head2 _genHash
+
+Example:
+	
+	my $alert = Alert::Handler::Alert->new(
+		xmlRoot => $hb_h
+	);
+	unpack("H*",$alert->alertHash());
+	
+Generates a unique hash for the alert object. Currently SHA512 is
+used as hash function. _genHash is automatically called by _init on
+alert object documentation.
+
+=head2 check
+
+Example:
+
+	$alert->check();
+	
+Checks if all values in the xml root are defined and can therfore be
+assigned to the alert object.
 
 =head2 xmlRoot
 
-Get the xml root respectively the xml hash
+Get the xml root respectively the xml hash.
+
+=head2 alertHash
+
+Example:
+
+	print unpack("H*",$alert->alertHash();
+	
+Get the calculated unique alert hash value (srvSerial + srvcName + hostName).
 
 =head2 version
 
 Example:
 
-	print heartbeat()->version();
+	print $alert->version();
 	
-Get the heartbeat version.
+Get the alert version.
 
 =head2 authkey
 
-Get the heartbeat auth key.
+Get the alert auth key.
 
 =head2 date
 
-Get the heartbeat date.
+Get the alert date.
+
+=head2 hostName
+
+Get the hostname the alert comes from.
+
+=head2 hostIP
+
+Get the IP adress the alert was sent from.
+
+=head2 hostOS
+
+Get the operating system the alert was sent from.
+
+=head2 srvSerial
+
+Get the serial number of the server the alert comes from.
+
+=head2 compSerial
+
+Get the serial number of the affected component, if available.
+
+=head2 compName
+
+Get the name of the affected component, if available.
+
+=head2 srvcName
+
+Get the name of the notification service.
+
+=head2 srvcStatus
+
+Get the alert status of the notification service.
+
+=head2 srvcOutput
+
+Get the alert output of the notification service.
+
+=head2 srvcPerfdata
+
+Get the performance data of the notification service.
+
+=head2 srvcDuration
+
+Get the duration the service check took to complete.
+
+=head1 DIAGNOSTICS
+
+=over
+
+=item C<< Non valid alert XML detected. >>
+
+The check function has found some undefined alert values.
+
+=item C<< Digest function returned an undefined value. >>
+
+The unique hash value for the alert could not be calculated.
+
+=back
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Alert::Handler::Heartbeat requires no configuration files.
+Alert::Handler::Alert requires no configuration files.
 
 =head1 DEPENDENCIES
 
@@ -170,6 +268,7 @@ Alert::Handler::Heartbeat requires no configuration files.
 	use strict;
 	use Carp;
 	use version;
+	use Digest::SHA qw(sha512);
 
 =head1 AUTHOR
 

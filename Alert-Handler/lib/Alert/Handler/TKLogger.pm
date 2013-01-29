@@ -102,7 +102,7 @@ Example:
 =head1 DESCRIPTION
 
 Alert::Handler::TKLogger uses Log::Dispatch to log to a specified log file.
-It adds a callback to the dispath logger to have a timestamp at each
+It adds a callback to the dispatch logger to have a timestamp at each
 logging message.
 
 =head1 METHODS
@@ -161,7 +161,7 @@ The given config file could not be parsed correctly.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Alert::Handler::Validation requires one configuration file to specify 
+Alert::Handler::TKLogger requires one configuration file to specify 
 the log file and the desired log level. The path to the config file
 must be specified when calling the constructor.
 

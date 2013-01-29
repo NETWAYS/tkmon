@@ -35,9 +35,8 @@ To generate a html version of the pod:
 
 GPG INSTALLATION
 
-In order to decrypt incoming emails setupt the private key information
+In order to decrypt incoming emails setup the private key information
 in the GpgConfig.cfg.
-
 
 COPYRIGHT AND LICENCE
 

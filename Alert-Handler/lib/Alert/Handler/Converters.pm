@@ -67,9 +67,6 @@ sub mysqlToDateTime{
 	return $strp->parse_datetime($dateStr);
 }
 
-sub dateDiffToHours{
-	
-}
 
 1; # Magic true value required at end of module
 __END__
@@ -104,7 +101,8 @@ Example:
 	my $dt = strToDateTime('Thu Oct 11 04:54:34 2012');
 
 Converts a string containing a date to a Date::Time object. Currenty the following
-pattern is supported: '%a %b %d %H:%M:%S %Y' - day of week, month, day of month, HH:MM:SS, year (cf. Example above).
+pattern is supported: '%a %b %d %H:%M:%S %Y' - day of week, month, day of month, 
+HH:MM:SS, year (cf. Example above).
 
 =head2 DateTimeToMysql
 
@@ -112,15 +110,31 @@ Example:
 
 	my $str = DateTimeToMysql($dt);
 
-Returns a string in mysql DATETIME format from the given Date::Time object
+Returns a string in mysql DATETIME format from the given Date::Time object.
 
 =head2 strToMysqlTime
 
 Example:
 
-	strToMysqlTime("Thu Oct 11 04:54:34 2012")
+	strToMysqlTime("Thu Oct 11 04:54:34 2012");
 
 Converts the given date string to a string in mysql DATETIME format.
+
+=head2 DateTimeToStr
+
+Example:
+
+	my $str = DateTimeToStr($dt);
+
+Returns a string represantation of the Date::Time object.
+
+=head2 mysqlToDateTime
+
+Example:
+
+	my $dt = mysqlToDateTime($str);
+	
+Returns a Date::Time object from the given mysql DATETIME string.
 
 =head1 DIAGNOSTICS
 

@@ -17,6 +17,7 @@ my $tkLogger = Alert::Handler::TKLogger->new(
 	);
 
 #Start processing the email
+#TODO Temporarily copy email to spool directory for later investigatement
 my $msg_str;
 while(<STDIN>){
 	$msg_str .= $_;

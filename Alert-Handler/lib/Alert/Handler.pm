@@ -191,12 +191,19 @@ This document describes Alert::Handler version 0.0.1
 Example:
 
 	my $tkHandler = Alert::Handler->new(
-		sender => $ARGV[0]
+		sender => $ARGV[0],
+		gpgCfg =>'../gnupg/GpgConfig.cfg',
+		mysqlCfg => '../mysql/MysqlConfig.cfg',
+		logCfg => '../filter/Logger.cfg'
 	);
-	$tkHandler->msg_str($msg_str);
-	$tkHandler->parseMsgStr();
-	$tkHandler->gpgCfg('../gnupg/GpgConfig.cfg');
-	$tkHandler->decryptXml();
+	try{
+		$tkHandler->msg_str($msg_str);
+		$tkHandler->parseMsgStr();
+		$tkHandler->decryptXml();
+	} catch{
+		$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);
+		exit(1);
+	};
 	
 =head1 DESCRIPTION
 
@@ -211,10 +218,17 @@ for checking if these objects must be inserted/updated to the mysql database.
 Example:
 
 	my $tkHandler = Alert::Handler->new(
-		sender => $ARGV[0]
+		sender => $ARGV[0],
+		gpgCfg =>'../gnupg/GpgConfig.cfg',
+		mysqlCfg => '../mysql/MysqlConfig.cfg',
+		logCfg => '../filter/Logger.cfg'
 	);
 	
-Constructor - creates a new Handler object.
+Constructor - creates a new Handler object. As the Handler needs to decrypt,
+connect to mysql and log three config files are required: 1. the gpg config
+to have the private key password to decrypt the xml, 2. the mysql connection
+credentials to write the objects to the duplicated database and 3. the logger
+config to set corresponding logging paths.
 
 =head2 sender
 
@@ -227,6 +241,18 @@ Get/set the receiver of the email.
 =head2 gpgCfg
 
 Get/set the gpg configuration file path.
+
+=head2 mysqlCfg
+
+Get/set the mysql configuration file path.
+
+=head2 logCfg
+
+Get/set the logger configuration file path.
+
+=head2 logger
+
+Get/set the TKlogger object, used to log Handler processing information.
 
 =head2 msg_str
 
@@ -263,11 +289,11 @@ Get/set the type of the xml - heartbeat or alert.
 
 =head2 heartbeat
 
-Get/set the heartbeat attribute.
+Get/set the heartbeat object attribute.
 
 =head2 alert
 
-Get/set the alert attribute.
+Get/set the alert object attribute.
 
 =head2 parseMsgStr
 
@@ -290,8 +316,8 @@ Decrypts the XML from the email message.
 
 =head2 parseXml
 
-Parse the xml from the email message. The email must be decrypted an parsed
-into body etc. before the xml can be parsed.
+Parse the xml from the email message, this returns an xml hash on success.
+The email must be decrypted an parsed into body etc. before the xml can be parsed.
 
 =head2 initMysql
 
@@ -300,33 +326,60 @@ Example:
 	my ($mysqlCfg,$DBCon) = initMysql('heartbeats');
 	
 Establish a mysql connection and read out the given section of the
-configuration file. The config file path is a static class variable.
+configuration file. The config file is assigned via the constructor
+at Handler object creation.
 
 =head2 handleHB
 
+Example:
+
+	try{
+		$tkLogger->info("Xml type: ".$tkHandler->xmlType());
+		my $ret = $tkHandler->handleHB();
+	} catch{
+		$tkLogger->emergency("Failed to handle HB with: ".$_);
+	};
+	
 Handles a heartbeat object - checks if the auth key is valid, if the timestamp
-must be updated in the database or if the heartbeat has to inserted into the
-database.
+must be updated in the database, if the alert can be deleted due to a service
+recover, or if the alert is new and has to be inserted into the database.
+Also loggs if an alert with the same timestamp is already in the dubplicate database.
+
+
+=head2 handleAL
+
+Example:
+
+	try{
+		my $ret = $tkHandler->handleAL();
+	} catch{
+		$tkLogger->emergency("Failed to handle AL with: ".$_);
+	};
+Handles an alert object - checks if the auth key is valid, if the timestamp
+must be updated in the database or if the heartbeat has to be inserted into the
+database. Also loggs if a heartbeat with the same timestamp is already in the
+dubplicate database.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
-Alert::Handler::Heartbeat requires a configuration file to establish
-the database connection.
+Alert::Handler::Heartbeat requires a configuration file for
+
+	-Decrypting the xml (gpgCfg)
+	-Establish the mysql connection (mysqlCfg)
+	-Setup correct logging (logCfg)
+
+The paths to this files must be set when calling the Handler constructor.
 
 =head1 DEPENDENCIES
 
-	use warnings;
-	use strict;
-	use Carp;
-	use version;
 	use Alert::Handler::Crypto;
 	use Alert::Handler::Email;
 	use Alert::Handler::Xml;
 	use Alert::Handler::Dbase;
-	use Alert::Handler::Converters;
 	use Alert::Handler::Validation;
 	use Alert::Handler::TKLogger;
 	use Alert::Handler::Heartbeat;
+	use Alert::Handler::Alert;
 
 =head1 AUTHOR
 

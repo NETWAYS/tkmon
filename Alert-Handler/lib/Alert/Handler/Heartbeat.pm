@@ -94,6 +94,10 @@ Inits the object attributes with the values from the xml root.
 As the xml root is has reference all the values from it must
 be assigned seperately to the heartbeat attributes.
 
+=head2 _check
+
+Checks if all object attributes are defined and therefor the xml is valid
+
 =head2 xmlRoot
 
 Get the xml root respectively the xml hash
@@ -113,6 +117,16 @@ Get the heartbeat auth key.
 =head2 date
 
 Get the heartbeat date.
+
+=head1 DIAGNOSTICS
+
+=over
+
+=item C<< Non valid heartbeat XML detected.. >>
+
+The check function found some undefined values, so the xml is not valid.
+
+=back
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

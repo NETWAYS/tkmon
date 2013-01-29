@@ -97,7 +97,7 @@ Example:
 
 Parses the given xml string. Returns a multi-level hash containing the xml structure.
 
-= getXmlType
+=head2 getXmlType
 
 Example:
 

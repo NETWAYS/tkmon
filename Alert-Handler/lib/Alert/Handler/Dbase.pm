@@ -235,7 +235,8 @@ sub ALIsDuplicate{
 		($fetchedDate ne strToMysqlTime($alert->date() ) )){
 		return 1;
 	}
-	#TODO Check also if date differs?
+	#TODO Check also if date differs? -> this would mean a different
+	#service output for the same timestamp -> should not be possible
 	#AL is in the table, status and date differs
 	if($alert->srvcStatus() ne $fetchedStatus){
 		return (2,$fetchedStatus);
@@ -351,13 +352,16 @@ This document describes Alert::Handler::Dbase version 0.0.1
 
 Example
 
-	use Alert::Handler::Dbase;
-	use Alert::Handler::Converters;
-	my $mysqlCfg = readMysqlCfg('../mysql/MysqlConfig.cfg','heartbeats');
-	my $DBCon = getConnection($mysqlCfg);
-	insertHB($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
-	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))){
-		say "Found a duplicate: 0123456789a";
+	my ($mysqlCfg,$DBCon) = $self->initMysql('heartbeats');
+	my $ret;
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
+		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
+	#found a duplicate
+	if($ret == 1){
+		updateHBDate($DBCon,$mysqlCfg->{'table'},
+			$heartbeat->date(),
+			$heartbeat->version(),$heartbeat->authkey());
+		$self->logger()->info("Found HB duplicate: ".$heartbeat->authkey());
 	}
 	closeConnection($DBCon);
 
@@ -365,7 +369,7 @@ Example
 
 Alert::Handler::Dbase connects to a mysql database. The module is able to
 insert and check Heartbeats and Alerts. In order to use the correct data format
-for inserts the module Alert::Handler::Converters is usable.
+for inserts and checks the module Alert::Handler::Converters can be used.
 
 =head1 METHODS 
 
@@ -411,30 +415,41 @@ Closes an open database connection by the given handle.
 
 Example:
 
-	insertHB($DBCon,$mysqlCfg->{'table'},"test@exmaple.com",
-	"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"));
+	insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
+		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
 
 Inserts a new heartbeat into the given table. The database is specified by a valid
-database handle. Parameters: Database handle, Database table, HB sender, HB version, HB authkey, HB date
-Use Alert::Handler::Converters (strToMysqlTime) to convert date formats.
+database handle. Parameters: Database handle, Database table, HB sender, HB version,
+HB authkey, HB date. insertHB uses Alert::Handler::Converters to convert the date to
+a mysql valid format.
+
+=head2 insertAL
+
+Example:
+
+	insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
+		$self->logger()->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
+
+Inserts a new alert into the given table. The database is specified by a valid
+database handle. Parameters: Database handle, Database table, alert object.
+insertAL uses Alert::Handler::Converters to convert the date to a mysql valid format.
 
 =head2 HBIsDuplicate
 
 Example:
 
-	if(HBIsDuplicate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a",strToMysqlTime("Thu Oct 11 04:54:34 2012"))==1){
-		say "Found a duplicate: 0123456789a";
-	}
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
+		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
 
 Checks if the given heartbeat (version, authkey, date) is already in the database.table.
 
 Parameters:
 
 	-DB Handle
-	-Table name to inser HB to
+	-Table name to check
 	-The HB version
 	-The HB authkey
-	-The new date time
+	-The current date time
 
 Return values:
 
@@ -447,14 +462,15 @@ Return values:
 Example:
 
 	updateHBDate($DBCon,$mysqlCfg->{'table'},
-			strToMysqlTime("Fri Nov 09 14:44:34 2012"),"0.1-dev","0123456789a");
+		$heartbeat->date(),
+		$heartbeat->version(),$heartbeat->authkey());
 
 Updates the DATETIME column of a given heartbeat.
 
 Parameters:
 
 	-DB Handle
-	-Table name to inser HB to
+	-Table name to insert HB to
 	-The new date time
 	-The HB version
 	-The HB authkey
@@ -466,6 +482,68 @@ Parameters:
 Read out the date for the given heartbeat (version,authkey). Returns the date
 as mysql string if succesfully read or undef if the authkey with its version
 is not in the database.
+
+=head2 ALIsDuplicate
+
+Example:
+
+	my ($ret,$fetchedStatus) = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
+
+Checks if the given alert object is already in the database.table.
+
+Parameters:
+
+	-DB Handle
+	-Table name to check
+	-The alert object
+
+Return values:
+
+	-'0' if the alert is not in the database
+	-'1' if the alert is in the database but the date differs
+	-'2' if the alert is in the database but the service state differs
+	-'-1' if the alert is in the database and has the same date
+	
+=head2 getALValsDB
+
+Example:
+
+	my ($fetchedDate,$fetchedStatus) = try{
+		getALValsDB($DB,$DBTable,$alert);
+	} catch{
+		"Failed to get AL values from DB with: ".$_;
+	};
+	
+Fetches date and state from the database. Parameters: Database handle,
+Database table, alert object. Takes the alert unique hash value and fetches
+the values from the database. If more than one alert is returned there is
+already a duplicate in the database, so this should not happen.
+
+=head2 delALDB
+
+Example:
+
+	delALDB($DBCon,$mysqlCfg->{'table'},$alert);
+	
+Delete the alert from the database.
+
+=head2 updateALDate
+
+Example:
+
+	updateALDate($DBCon,$mysqlCfg->{'table'},$alert);
+
+Update the date for the alert. Paramerters: Database handle, Database table,
+alert object. As update the date from the alert object is taken.
+
+=head2 updateALStatus
+
+Example:
+
+	updateALStatus($DBCon,$mysqlCfg->{'table'},$alert);
+
+Update the service status for the alert. Paramerters: Database handle, Database table,
+alert object. As update the service status from the alert object is taken.
 
 =head1 DIAGNOSTICS
 
@@ -524,6 +602,27 @@ from the database is undefined.
 
 Updating a hearbeat date must update only one row.
 
+=item C<< Failed to get AL values from DB with: >>
+
+ALIsDuplicate could not fetch values from database.
+
+=item C<< Warning - Already a duplicate AL in DB. >>
+
+GetAlValsDB found more than one entry in the database with the given hash.
+Therefore duplicate checking was not successful.
+
+=item C<< Affected rows for deleting AL returned wrong count. >>
+
+Deleting an Alert should only affect one database row.
+
+=item C<< Affected rows for updating AL daate returned wrong count. >>
+
+Updating an alert date should only affect one database row.
+
+=item C<< Affected rows for updating AL status returned wrong count. >>
+
+Updating an alert status should only affect one database row.
+
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
@@ -541,7 +640,10 @@ config hash.
 	use Carp;
 	use DBI;
 	use Config::IniFiles;
+	use Try::Tiny;
 	use version;
+	use Alert::Handler::Converters;
+	use Alert::Handler::Alert;
 
 =head1 AUTHOR
 
