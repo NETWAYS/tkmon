@@ -2,12 +2,16 @@
 use strict;
 use warnings;
 use Try::Tiny;
+use IO::File;
+use Carp;
 
 use Alert::Handler;
 use Alert::Handler::TKLogger;
 
 our $FILTER_DIR = "/etc/postfix/filter";
 our $SENDMAIL = "/usr/sbin/sendmail";
+our $MAILDIR = "/var/spool/tkmon";#temp dir to store mails
+
 #Exit codes of commands invoked by postfix
 our $TEMPFAIL = 75;
 our $UNAVAILABLE = 69;
@@ -22,6 +26,9 @@ my $msg_str;
 while(<STDIN>){
 	$msg_str .= $_;
 }
+
+#backup mail
+saveMail($msg_str,$ARGV[0]);
 
 #Setup up the Handler and decrypt the email
 my $tkHandler = Alert::Handler->new(
@@ -80,6 +87,27 @@ if($tkHandler->xmlType() eq 'alert'){
 		exit(1);
 	};
 }
+
+
+sub saveMail{
+	my $mail_str = shift;
+	my $sender = shift;
+	my $time_str = scalar(localtime);
+	$time_str =~ s/\s/\_/g;
+	my $fname = $MAILDIR.'/'.$sender.'-'.$time_str;
+	my $fh = new IO::File "> $fname";
+	if(defined $fh){
+		print $fh $mail_str;
+		$fh->close;
+	}
+	else{
+		confess "Could not save mail from ".$sender." to /var/spool/tkmon/".$fname;
+	}
+	exit(0);
+	return $time_str;
+}
+
+
 
 
 __END__

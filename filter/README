@@ -1,0 +1,8 @@
+INSTALLATION
+
+To read about a Postfix After-Queue Content Filter visit
+http://www.postfix.org/FILTER_README.html
+
+TESTING
+
+perl -I ../Alert-Handler/lib/ TKMonitor.pl < ../examples/EncALMail.txt test@example.com
