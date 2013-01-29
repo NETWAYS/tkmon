@@ -1,0 +1,517 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::Dbase</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS 
+
+</A><UL>
+<LI><A HREF="#readMysqlCfg">readMysqlCfg
+
+</A><LI><A HREF="#getConnection">getConnection
+
+</A><LI><A HREF="#closeConnection">closeConnection
+
+</A><LI><A HREF="#insertHB">insertHB
+
+</A><LI><A HREF="#insertAL">insertAL
+
+</A><LI><A HREF="#HBIsDuplicate">HBIsDuplicate
+
+</A><LI><A HREF="#updateHBDate">updateHBDate
+
+</A><LI><A HREF="#getHBDate">getHBDate
+
+</A><LI><A HREF="#ALIsDuplicate">ALIsDuplicate
+
+</A><LI><A HREF="#getALValsDB">getALValsDB
+
+</A><LI><A HREF="#delALDB">delALDB
+
+</A><LI><A HREF="#updateALDate">updateALDate
+
+</A><LI><A HREF="#updateALStatus">updateALStatus
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::Dbase - Access mysql databases and work with Heartbeats and Alerts
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::Dbase version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example
+
+</P>
+<PRE>	my ($mysqlCfg,$DBCon) = $self-&gt;initMysql('heartbeats');
+	my $ret;
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg-&gt;{'table'},
+		$heartbeat-&gt;version(),$heartbeat-&gt;authkey(),$heartbeat-&gt;date());
+	#found a duplicate
+	if($ret == 1){
+		updateHBDate($DBCon,$mysqlCfg-&gt;{'table'},
+			$heartbeat-&gt;date(),
+			$heartbeat-&gt;version(),$heartbeat-&gt;authkey());
+		$self-&gt;logger()-&gt;info(&quot;Found HB duplicate: &quot;.$heartbeat-&gt;authkey());
+	}
+	closeConnection($DBCon);</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert::Handler::Dbase connects to a mysql database. The module is able to
+insert and check Heartbeats and Alerts. In order to use the correct data format
+for inserts and checks the module Alert::Handler::Converters can be used.
+
+</P><H1><A NAME="METHODS">METHODS 
+
+</A></H1>
+<H2><A NAME="readMysqlCfg">readMysqlCfg
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $mysqlCfg = readMysqlCfg('../mysql/MysqlConfig.cfg','heartbeats');</PRE>
+
+<P>Parses a mysql config file, see Config::IniFiles for config format. The second parameter 
+is the corresponding section in the ini file that should be read out.
+The function returns a hash containing the config parameters.
+
+</P>
+<P>Example Config:
+
+</P>
+<PRE>	[alerts]
+	host = 192.168.56.101
+	db = tk_monitoring
+	table = Alerts
+	user = root
+	pwd = TOBEDEFINED</PRE>
+<H2><A NAME="getConnection">getConnection
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $DBCon = getConnection($mysqlCfg);</PRE>
+
+<P>Calls the DBI connect function and tries to connect to the mysql server. The host,
+database, user and password must be specified in the config file which must be read by
+readMysqlCfg before calling getConnection.
+On Success returns a valid database handle else raises an error.
+
+</P><H2><A NAME="closeConnection">closeConnection
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	closeConnection($DBCon);</PRE>
+
+<P>Closes an open database connection by the given handle.
+
+</P><H2><A NAME="insertHB">insertHB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	insertHB($DBCon,$mysqlCfg-&gt;{'table'},$self-&gt;sender(),
+		$heartbeat-&gt;version(),$heartbeat-&gt;authkey(),$heartbeat-&gt;date());</PRE>
+
+<P>Inserts a new heartbeat into the given table. The database is specified by a valid
+database handle. Parameters: Database handle, Database table, HB sender, HB version,
+HB authkey, HB date. insertHB uses Alert::Handler::Converters to convert the date to
+a mysql valid format.
+
+</P><H2><A NAME="insertAL">insertAL
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	insertAL($DBCon,$mysqlCfg-&gt;{'table'},$self-&gt;sender(),$alert);
+		$self-&gt;logger()-&gt;info(&quot;Inserted new AL in DB: &quot;.$self-&gt;sender().', '.$alert-&gt;authkey());</PRE>
+
+<P>Inserts a new alert into the given table. The database is specified by a valid
+database handle. Parameters: Database handle, Database table, alert object.
+insertAL uses Alert::Handler::Converters to convert the date to a mysql valid format.
+
+</P><H2><A NAME="HBIsDuplicate">HBIsDuplicate
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	$ret = HBIsDuplicate($DBCon,$mysqlCfg-&gt;{'table'},
+		$heartbeat-&gt;version(),$heartbeat-&gt;authkey(),$heartbeat-&gt;date());</PRE>
+
+<P>Checks if the given heartbeat (version, authkey, date) is already in the database.table.
+
+</P>
+<P>Parameters:
+
+</P>
+<PRE>	-DB Handle
+	-Table name to check
+	-The HB version
+	-The HB authkey
+	-The current date time</PRE>
+
+<P>Return values:
+
+</P>
+<PRE>	-'0' if the heartbeat is not in the database
+	-'1' if the heartbeat is in the database but the date differs
+	-'-1' if the heartbeat is in the database and has the same date</PRE>
+<H2><A NAME="updateHBDate">updateHBDate
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	updateHBDate($DBCon,$mysqlCfg-&gt;{'table'},
+		$heartbeat-&gt;date(),
+		$heartbeat-&gt;version(),$heartbeat-&gt;authkey());</PRE>
+
+<P>Updates the DATETIME column of a given heartbeat.
+
+</P>
+<P>Parameters:
+
+</P>
+<PRE>	-DB Handle
+	-Table name to insert HB to
+	-The new date time
+	-The HB version
+	-The HB authkey</PRE>
+<H2><A NAME="getHBDate">getHBDate
+
+</A></H2>
+
+<PRE>	print getHBDate($DBCon,$mysqlCfg-&gt;{'table'},&quot;0.1-dev&quot;,&quot;0123456789a&quot;);</PRE>
+
+<P>Read out the date for the given heartbeat (version,authkey). Returns the date
+as mysql string if succesfully read or undef if the authkey with its version
+is not in the database.
+
+</P><H2><A NAME="ALIsDuplicate">ALIsDuplicate
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my ($ret,$fetchedStatus) = ALIsDuplicate($DBCon,$mysqlCfg-&gt;{'table'},$alert);</PRE>
+
+<P>Checks if the given alert object is already in the database.table.
+
+</P>
+<P>Parameters:
+
+</P>
+<PRE>	-DB Handle
+	-Table name to check
+	-The alert object</PRE>
+
+<P>Return values:
+
+</P>
+<PRE>	-'0' if the alert is not in the database
+	-'1' if the alert is in the database but the date differs
+	-'2' if the alert is in the database but the service state differs
+	-'-1' if the alert is in the database and has the same date
+	
+</PRE>
+<H2><A NAME="getALValsDB">getALValsDB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my ($fetchedDate,$fetchedStatus) = try{
+		getALValsDB($DB,$DBTable,$alert);
+	} catch{
+		&quot;Failed to get AL values from DB with: &quot;.$_;
+	};
+	
+</PRE>
+
+<P>Fetches date and state from the database. Parameters: Database handle,
+Database table, alert object. Takes the alert unique hash value and fetches
+the values from the database. If more than one alert is returned there is
+already a duplicate in the database, so this should not happen.
+
+</P><H2><A NAME="delALDB">delALDB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	delALDB($DBCon,$mysqlCfg-&gt;{'table'},$alert);
+	
+</PRE>
+
+<P>Delete the alert from the database.
+
+</P><H2><A NAME="updateALDate">updateALDate
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	updateALDate($DBCon,$mysqlCfg-&gt;{'table'},$alert);</PRE>
+
+<P>Update the date for the alert. Paramerters: Database handle, Database table,
+alert object. As update the date from the alert object is taken.
+
+</P><H2><A NAME="updateALStatus">updateALStatus
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	updateALStatus($DBCon,$mysqlCfg-&gt;{'table'},$alert);</PRE>
+
+<P>Update the service status for the alert. Paramerters: Database handle, Database table,
+alert object. As update the service status from the alert object is taken.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Cannot%20use%20empty%20config%20path%20or%20empty%20section."><CODE>Cannot use empty config path or empty section.</CODE>
+
+</A></DT>
+<DD>
+The given path or section in readMysqlCfg is empty.
+
+</DD>
+<DT><A NAME="Could%20not%20read%20mysql%20config."><CODE>Could not read mysql config.</CODE>
+
+</A></DT>
+<DD>
+Reading the config file with Config::IniFiles in readMysqlCfg returned an error.
+
+</DD>
+<DT><A NAME="Cannot%20use%20undefined%20mysql%20config."><CODE>Cannot use undefined mysql config.</CODE>
+
+</A></DT>
+<DD>
+The config reference in getConnection is undefined.
+
+</DD>
+<DT><A NAME="Could%20not%20connect%20to%20database%3a%20%24DBI%3a%3aerrstr"><CODE>Could not connect to database: $DBI::errstr</CODE>
+
+</A></DT>
+<DD>
+The DBI connect function in getConnection returned an error.
+
+</DD>
+<DT><A NAME="Cannot%20close%20undefined%20mysql%20connection."><CODE>Cannot close undefined mysql connection.</CODE>
+
+</A></DT>
+<DD>
+The DB handle in closeConnection is undefined.
+
+</DD>
+<DT><A NAME="Cannot%20use%20undefined%20database%20table."><CODE>Cannot use undefined database table.</CODE>
+
+</A></DT>
+<DD>
+The specified database table is undefined.
+
+</DD>
+<DT><A NAME="Cannot%20use%20undefined%20database%20handle."><CODE>Cannot use undefined database handle.</CODE>
+
+</A></DT>
+<DD>
+The specified database handle is undefined.
+
+</DD>
+<DT><A NAME="Affected%20rows%20for%20inseting%20HB%20returned%20wrong%20count."><CODE>Affected rows for inseting HB returned wrong count.</CODE>
+
+</A></DT>
+<DD>
+Inserting a heartbeat should only affect 1 row, this error signals
+that the INSERT affected rows != 1.
+
+</DD>
+<DT><A NAME="Warning%20-%20Already%20a%20duplicate%20HB%20in%20DB."><CODE>Warning - Already a duplicate HB in DB.</CODE>
+
+</A></DT>
+<DD>
+Checking for a duplicate heartbeat should return only 1 entry
+when carrying out a SELECT. If SELECT returns more than one entry
+than there is already a duplicate in the database.
+
+</DD>
+<DT><A NAME="Cannot%20insert%20empty%20HB%20values%20to%20database."><CODE>Cannot insert empty HB values to database.</CODE>
+
+</A></DT>
+<DD>
+One of the given parameters (version, authkey, date) for inserting
+is undefined.
+
+</DD>
+<DT><A NAME="Cannot%20select%20empty%20HB%20values%20from%20database."><CODE>Cannot select empty HB values from database.</CODE>
+
+</A></DT>
+<DD>
+One of the given parameters (version, authkey, date) for selecting
+from the database is undefined.
+
+</DD>
+<DT><A NAME="Affected%20rows%20for%20updating%20HB%20Date%20returned%20wrong%20count."><CODE>Affected rows for updating HB Date returned wrong count.</CODE>
+
+</A></DT>
+<DD>
+Updating a hearbeat date must update only one row.
+
+</DD>
+<DT><A NAME="Failed%20to%20get%20AL%20values%20from%20DB%20with%3a"><CODE>Failed to get AL values from DB with:</CODE>
+
+</A></DT>
+<DD>
+ALIsDuplicate could not fetch values from database.
+
+</DD>
+<DT><A NAME="Warning%20-%20Already%20a%20duplicate%20AL%20in%20DB."><CODE>Warning - Already a duplicate AL in DB.</CODE>
+
+</A></DT>
+<DD>
+GetAlValsDB found more than one entry in the database with the given hash.
+Therefore duplicate checking was not successful.
+
+</DD>
+<DT><A NAME="Affected%20rows%20for%20deleting%20AL%20returned%20wrong%20count."><CODE>Affected rows for deleting AL returned wrong count.</CODE>
+
+</A></DT>
+<DD>
+Deleting an Alert should only affect one database row.
+
+</DD>
+<DT><A NAME="Affected%20rows%20for%20updating%20AL%20daate%20returned%20wrong%20count."><CODE>Affected rows for updating AL daate returned wrong count.</CODE>
+
+</A></DT>
+<DD>
+Updating an alert date should only affect one database row.
+
+</DD>
+<DT><A NAME="Affected%20rows%20for%20updating%20AL%20status%20returned%20wrong%20count."><CODE>Affected rows for updating AL status returned wrong count.</CODE>
+
+</A></DT>
+<DD>
+Updating an alert status should only affect one database row.
+
+</DD>
+</DL>
+<H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A></H1>
+
+<P>Alert::Handler::Dbase requires one configuration file to
+specify how to connect to the mysql server. Also the desired table
+is specified in this file. A call to readMysqlCfg needs the
+path to this file in order to parse the file and init the 
+config hash.
+
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use DBI;
+	use Config::IniFiles;
+	use Try::Tiny;
+	use version;
+	use Alert::Handler::Converters;
+	use Alert::Handler::Alert;</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.</P>
+</BODY>
+</HTML>

@@ -1,0 +1,214 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::Heartbeat</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS 
+
+</A><UL>
+<LI><A HREF="#new">new
+
+</A><LI><A HREF="#_init">_init
+
+</A><LI><A HREF="#_check">_check
+
+</A><LI><A HREF="#xmlRoot">xmlRoot
+
+</A><LI><A HREF="#version">version
+
+</A><LI><A HREF="#authkey">authkey
+
+</A><LI><A HREF="#date">date
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::Heartbeat - A class to represent a valid heartbeat
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::Heartbeat version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example:
+
+</P>
+<PRE>	my $heartbeat = Alert::Handler::Heartbeat-&gt;new(
+		xmlRoot =&gt; $xmlRoot
+	);
+	$tkLogger-&gt;info(&quot;Xml type: &quot;.$tkHandler-&gt;xmlType());
+	$tkLogger-&gt;info(&quot;Mail sender: &quot;.$tkHandler-&gt;sender());
+	
+</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert:.Handler::Heartbeat represents a heartbeat object. The object
+has as main attributes the corresponding information from the heartbeat
+xml. 
+
+</P><H1><A NAME="METHODS">METHODS 
+
+</A></H1>
+<H2><A NAME="new">new
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $heartbeat = Alert::Handler::Heartbeat-&gt;new(
+		xmlRoot =&gt; $xmlRoot
+	);
+	
+</PRE>
+
+<P>The constructor - creates a Heartbeat object. $xmlRoot is a parsed xml
+reference from XML::Bare and it can be obtained via parseXmlText or
+parseXmlFile from the Alert::Handler::Xml module.
+
+</P><H2><A NAME="_init">_init
+
+</A></H2>
+
+<P>Inits the object attributes with the values from the xml root.
+As the xml root is has reference all the values from it must
+be assigned seperately to the heartbeat attributes.
+
+</P><H2><A NAME="_check">_check
+
+</A></H2>
+
+<P>Checks if all object attributes are defined and therefor the xml is valid
+
+</P><H2><A NAME="xmlRoot">xmlRoot
+
+</A></H2>
+
+<P>Get the xml root respectively the xml hash
+
+</P><H2><A NAME="version">version
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print heartbeat()-&gt;version();
+	
+</PRE>
+
+<P>Get the heartbeat version.
+
+</P><H2><A NAME="authkey">authkey
+
+</A></H2>
+
+<P>Get the heartbeat auth key.
+
+</P><H2><A NAME="date">date
+
+</A></H2>
+
+<P>Get the heartbeat date.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Non%20valid%20heartbeat%20XML%20detected.."><CODE>Non valid heartbeat XML detected..</CODE>
+
+</A></DT>
+<DD>
+The check function found some undefined values, so the xml is not valid.
+
+</DD>
+</DL>
+<H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A></H1>
+
+<P>Alert::Handler::Heartbeat requires no configuration files.
+
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use version;</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+</P>
+</BODY>
+</HTML>

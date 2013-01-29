@@ -1,0 +1,223 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::Xml</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS
+
+</A><UL>
+<LI><A HREF="#parseXmlFile">parseXmlFile
+
+</A><LI><A HREF="#parseXmlText">parseXmlText
+
+</A><LI><A HREF="#getXmlType">getXmlType
+
+</A><LI><A HREF="#getHBVersion">getHBVersion
+
+</A><LI><A HREF="#getHBAuthKey">getHBAuthKey
+
+</A><LI><A HREF="#getHBDate">getHBDate
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::Xml - Parse TK monitoring xml files.
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::Xml version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example:
+
+</P>
+<PRE>	my $hb_h = parseXmlFile('HeartbeatTest.xml');
+	print getHBVersion($hb_h).&quot;\n&quot;;
+	print getHBDate($hb_h).&quot;\n&quot;;
+	my $authKey = getHBAuthKey($hb_h);</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert::Handler::Xml parses the defined xml structures. The module is able
+to handle valid heartbeat and alert xmls.
+
+</P><H1><A NAME="METHODS">METHODS
+
+</A></H1>
+<H2><A NAME="parseXmlFile">parseXmlFile
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $hb_h = parseXmlFile('HeartbeatTest.xml');</PRE>
+
+<P>Parses the xml file, only one parameter is needed - the file path. Returns
+a multi-level hash containing the xml structure.
+
+</P><H2><A NAME="parseXmlText">parseXmlText
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $hb_h = parseXmlText($xml_str);</PRE>
+
+<P>Parses the given xml string. Returns a multi-level hash containing the xml structure.
+
+</P><H2><A NAME="getXmlType">getXmlType
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print getXmlType($hb_h);
+	
+</PRE>
+
+<P>Returns the type for the given, parsed xml root $hb_h. The type can be
+'heartbeat' or 'alert'.
+
+</P><H2><A NAME="getHBVersion">getHBVersion
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print getHBVersion($hb_h);</PRE>
+
+<P>Returns the version tag of the heartbeat xml.
+
+</P><H2><A NAME="getHBAuthKey">getHBAuthKey
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print getHBAuthKey($hb_h);</PRE>
+
+<P>Returns the authkey tag of the heartbeat xml.
+
+</P><H2><A NAME="getHBDate">getHBDate
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print getHBAuthKey($hb_h);</PRE>
+
+<P>Returns the date tag (timestamp) of the heartbeat xml.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Could%20not%20parse%20XML%20file."><CODE>Could not parse XML file.</CODE>
+
+</A></DT>
+<DD>
+The given xml file could not be parsed by parseXmlFile.
+
+</DD>
+<DT><A NAME="Could%20not%20parse%20XML%20string."><CODE>Could not parse XML string.</CODE>
+
+</A></DT>
+<DD>
+The given xml string could not be parsed by parseXmlText.
+
+</DD>
+<DT><A NAME="Cannot%20parse%20empty%20xml%20string."><CODE>Cannot parse empty xml string.</CODE>
+
+</A></DT>
+<DD>
+The given xml string to the parsing function is undefined.
+
+</DD>
+</DL>
+<H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use version;
+	use XML::Bare;</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+</P>
+</BODY>
+</HTML>

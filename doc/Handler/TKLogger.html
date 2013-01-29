@@ -1,0 +1,211 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::TKLogger</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS
+
+</A><UL>
+<LI><A HREF="#new">new
+
+</A><LI><A HREF="#_init">_init
+
+</A><LI><A HREF="#%24LOGADD">$LOGADD
+
+</A><LI><A HREF="#info">info
+
+</A><LI><A HREF="#emergency">emergency
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::TKLogger - A logger for TK monitoring.
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::TKLogger version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example:
+
+</P>
+<PRE>	my $tkLogger = Alert::Handler::TKLogger-&gt;new(
+		cfgPath =&gt; './Logger.cfg'
+	);
+	$tkLogger-&gt;emergency(&quot;Failed to handle HB with: &quot;.$_);</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert::Handler::TKLogger uses Log::Dispatch to log to a specified log file.
+It adds a callback to the dispatch logger to have a timestamp at each
+logging message.
+
+</P><H1><A NAME="METHODS">METHODS
+
+</A></H1>
+<H2><A NAME="new">new
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $tkLogger = Alert::Handler::TKLogger-&gt;new(
+		cfgPath =&gt; './Logger.cfg'
+	);
+	
+</PRE>
+
+<P>Constructor - creates a new TKLogger object with the given log
+configuration. The configuration defines the path of the log file
+and the desired log level.
+
+</P><H2><A NAME="_init">_init
+
+</A></H2>
+
+<P>A private function to check the config, read the config
+sections an create the Log::Dispatch object.
+
+</P><H2><A NAME="%24LOGADD">$LOGADD
+
+</A></H2>
+
+<P>A callback to add a timestamp to each log message.
+
+</P><H2><A NAME="info">info
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	$tkLogger-&gt;info(&quot;HB with same timestamp already in DB: &quot;.$heartbeat-&gt;authkey());</PRE>
+
+<P>Calls the info level and logs the given message.
+
+</P><H2><A NAME="emergency">emergency
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	$tkLogger-&gt;emergency(&quot;Failed to handle HB with: &quot;.$_);
+	
+</PRE>
+
+<P>Calls the emergency level and logs the given message.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Cannot%20use%20empty%20config%20path%20or%20empty%20section"><CODE>Cannot use empty config path or empty section</CODE>
+
+</A></DT>
+<DD>
+The given logger config file path is empty or the section of the
+config is empty.
+
+</DD>
+<DT><A NAME="Could%20not%20read%20logger%20config"><CODE>Could not read logger config</CODE>
+
+</A></DT>
+<DD>
+The given config file could not be parsed correctly.
+
+</DD>
+</DL>
+<H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A></H1>
+
+<P>Alert::Handler::TKLogger requires one configuration file to specify 
+the log file and the desired log level. The path to the config file
+must be specified when calling the constructor.
+
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use version;
+	use Log::Dispatch;
+	use Log::Dispatch::File;</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.
+</P>
+</BODY>
+</HTML>

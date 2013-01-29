@@ -1,0 +1,360 @@
+<HTML>
+<HEAD>
+<TITLE>Alert::Handler::Alert</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffff" TEXT="#000000">
+<UL>
+<LI><A HREF="#NAME">NAME
+
+</A><LI><A HREF="#VERSION">VERSION
+
+</A><LI><A HREF="#SYNOPSIS">SYNOPSIS
+
+</A><LI><A HREF="#DESCRIPTION">DESCRIPTION
+
+</A><LI><A HREF="#METHODS">METHODS 
+
+</A><UL>
+<LI><A HREF="#new">new
+
+</A><LI><A HREF="#_init">_init
+
+</A><LI><A HREF="#_genHash">_genHash
+
+</A><LI><A HREF="#check">check
+
+</A><LI><A HREF="#xmlRoot">xmlRoot
+
+</A><LI><A HREF="#alertHash">alertHash
+
+</A><LI><A HREF="#version">version
+
+</A><LI><A HREF="#authkey">authkey
+
+</A><LI><A HREF="#date">date
+
+</A><LI><A HREF="#hostName">hostName
+
+</A><LI><A HREF="#hostIP">hostIP
+
+</A><LI><A HREF="#hostOS">hostOS
+
+</A><LI><A HREF="#srvSerial">srvSerial
+
+</A><LI><A HREF="#compSerial">compSerial
+
+</A><LI><A HREF="#compName">compName
+
+</A><LI><A HREF="#srvcName">srvcName
+
+</A><LI><A HREF="#srvcStatus">srvcStatus
+
+</A><LI><A HREF="#srvcOutput">srvcOutput
+
+</A><LI><A HREF="#srvcPerfdata">srvcPerfdata
+
+</A><LI><A HREF="#srvcDuration">srvcDuration
+
+</A></UL>
+<LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
+
+</A><LI><A HREF="#CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A><LI><A HREF="#DEPENDENCIES">DEPENDENCIES
+
+</A><LI><A HREF="#AUTHOR">AUTHOR
+
+</A><LI><A HREF="#LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A><LI><A HREF="#DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></UL>
+<HR>
+<H1><A NAME="NAME">NAME
+
+</A></H1>
+
+<P>Alert::Handler::Alert - A class to represent a valid notification alert
+
+</P><H1><A NAME="VERSION">VERSION
+
+</A></H1>
+
+<P>This document describes Alert::Handler::Alert version 0.0.1
+
+</P><H1><A NAME="SYNOPSIS">SYNOPSIS
+
+</A></H1>
+
+<P>Example:
+
+</P>
+<PRE>	$hb_h = parseXmlFile('../examples/FilterAL.xml');
+	my $alert = Alert::Handler::Alert-&gt;new(
+		xmlRoot =&gt; $hb_h
+	);
+	$tkLogger-&gt;info(&quot;Xml type: &quot;.getXmlType($hb_h));
+	$tkLogger-&gt;info(&quot;Version: &quot;.$alert-&gt;version());
+	
+</PRE>
+<H1><A NAME="DESCRIPTION">DESCRIPTION
+
+</A></H1>
+
+<P>Alert:.Handler::Alert represents an alert object. The object
+has as main attributes the corresponding information from the alert
+xml. 
+
+</P><H1><A NAME="METHODS">METHODS 
+
+</A></H1>
+<H2><A NAME="new">new
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $alert = Alert::Handler::Alert-&gt;new(
+		xmlRoot =&gt; $hb_h
+	);
+	
+</PRE>
+
+<P>The constructor - creates an alert object. $xmlRoot is a parsed xml
+reference from XML::Bare and it can be obtained via parseXmlText or
+parseXmlFile from the Alert::Handler::Xml module.
+
+</P><H2><A NAME="_init">_init
+
+</A></H2>
+
+<P>Inits the object attributes with the values from the xml root.
+As the xml root has hash references all the values from it must
+be assigned seperately to the alert attributes. Moreover _init
+checks if all values are defined and throws an exception if any
+value is undefined (except component serial or name, as they can
+be NULL).
+Finally _init generates a unique hash value (currently
+SHA512) out of &quot;srvSerial + srvcName + hostName&quot; to detect duplicates
+in the database.
+
+
+</P><H2><A NAME="_genHash">_genHash
+
+</A></H2>
+
+<P>Example:
+	
+</P>
+<PRE>	my $alert = Alert::Handler::Alert-&gt;new(
+		xmlRoot =&gt; $hb_h
+	);
+	unpack(&quot;H*&quot;,$alert-&gt;alertHash());
+	
+</PRE>
+
+<P>Generates a unique hash for the alert object. Currently SHA512 is
+used as hash function. _genHash is automatically called by _init on
+alert object documentation.
+
+</P><H2><A NAME="check">check
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	$alert-&gt;check();
+	
+</PRE>
+
+<P>Checks if all values in the xml root are defined and can therfore be
+assigned to the alert object.
+
+</P><H2><A NAME="xmlRoot">xmlRoot
+
+</A></H2>
+
+<P>Get the xml root respectively the xml hash.
+
+</P><H2><A NAME="alertHash">alertHash
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print unpack(&quot;H*&quot;,$alert-&gt;alertHash();
+	
+</PRE>
+
+<P>Get the calculated unique alert hash value (srvSerial + srvcName + hostName).
+
+</P><H2><A NAME="version">version
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	print $alert-&gt;version();
+	
+</PRE>
+
+<P>Get the alert version.
+
+</P><H2><A NAME="authkey">authkey
+
+</A></H2>
+
+<P>Get the alert auth key.
+
+</P><H2><A NAME="date">date
+
+</A></H2>
+
+<P>Get the alert date.
+
+</P><H2><A NAME="hostName">hostName
+
+</A></H2>
+
+<P>Get the hostname the alert comes from.
+
+</P><H2><A NAME="hostIP">hostIP
+
+</A></H2>
+
+<P>Get the IP adress the alert was sent from.
+
+</P><H2><A NAME="hostOS">hostOS
+
+</A></H2>
+
+<P>Get the operating system the alert was sent from.
+
+</P><H2><A NAME="srvSerial">srvSerial
+
+</A></H2>
+
+<P>Get the serial number of the server the alert comes from.
+
+</P><H2><A NAME="compSerial">compSerial
+
+</A></H2>
+
+<P>Get the serial number of the affected component, if available.
+
+</P><H2><A NAME="compName">compName
+
+</A></H2>
+
+<P>Get the name of the affected component, if available.
+
+</P><H2><A NAME="srvcName">srvcName
+
+</A></H2>
+
+<P>Get the name of the notification service.
+
+</P><H2><A NAME="srvcStatus">srvcStatus
+
+</A></H2>
+
+<P>Get the alert status of the notification service.
+
+</P><H2><A NAME="srvcOutput">srvcOutput
+
+</A></H2>
+
+<P>Get the alert output of the notification service.
+
+</P><H2><A NAME="srvcPerfdata">srvcPerfdata
+
+</A></H2>
+
+<P>Get the performance data of the notification service.
+
+</P><H2><A NAME="srvcDuration">srvcDuration
+
+</A></H2>
+
+<P>Get the duration the service check took to complete.
+
+</P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
+
+</A></H1>
+<DL><DT><A NAME="Non%20valid%20alert%20XML%20detected."><CODE>Non valid alert XML detected.</CODE>
+
+</A></DT>
+<DD>
+The check function has found some undefined alert values.
+
+</DD>
+<DT><A NAME="Digest%20function%20returned%20an%20undefined%20value."><CODE>Digest function returned an undefined value.</CODE>
+
+</A></DT>
+<DD>
+The unique hash value for the alert could not be calculated.
+
+</DD>
+</DL>
+<H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
+
+</A></H1>
+
+<P>Alert::Handler::Alert requires no configuration files.
+
+</P><H1><A NAME="DEPENDENCIES">DEPENDENCIES
+
+</A></H1>
+
+<PRE>	use warnings;
+	use strict;
+	use Carp;
+	use version;
+	use Digest::SHA qw(sha512);</PRE>
+<H1><A NAME="AUTHOR">AUTHOR
+
+</A></H1>
+
+<P>Georg Sch&#195;&#182;nberger  <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>
+
+</P><H1><A NAME="LICENCE%20AND%20COPYRIGHT">LICENCE AND COPYRIGHT
+
+</A></H1>
+
+<P>Copyright (c) 2012, Georg Sch&#195;&#182;nberger <CODE>&lt;gschoenberger@thomas-krenn.com&gt;</CODE>. All rights reserved.
+
+</P>
+<P>This module is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself. See <A HREF="../../perlartistic.html">perlartistic</A>.
+
+</P><H1><A NAME="DISCLAIMER%20OF%20WARRANTY">DISCLAIMER OF WARRANTY
+
+</A></H1>
+
+<P>BECAUSE THIS SOFTWARE IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY
+FOR THE SOFTWARE, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN
+OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES
+PROVIDE THE SOFTWARE &quot;AS IS&quot; WITHOUT WARRANTY OF ANY KIND, EITHER
+EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE
+ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE SOFTWARE IS WITH
+YOU. SHOULD THE SOFTWARE PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL
+NECESSARY SERVICING, REPAIR, OR CORRECTION.
+
+</P>
+<P>IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING
+WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR
+REDISTRIBUTE THE SOFTWARE AS PERMITTED BY THE ABOVE LICENCE, BE
+LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL,
+OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE
+THE SOFTWARE (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING
+RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A
+FAILURE OF THE SOFTWARE TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF
+SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF
+SUCH DAMAGES.</P>
+</BODY>
+</HTML>
