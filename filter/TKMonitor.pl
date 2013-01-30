@@ -29,8 +29,8 @@ while(<STDIN>){
 }
 
 #backup mail, keep filename to remove it at the end
-try{
-	my $fname = saveMail($msg_str,$ARGV[0]);
+my $fname = try{
+	saveMail($msg_str,$ARGV[0]);
 } catch{
 	$tkLogger->emergency("Failed to save mail with: ".$_);
 	#TODO: Try to handle mail even without backup?
@@ -94,9 +94,16 @@ if($tkHandler->xmlType() eq 'alert'){
 	};
 	#check if mail has been generated
 	if(defined($tkHandler->msg_plain())){
-		#FIXME Remove tmp email
 		saveMail(toString($tkHandler->msg_plain()),$ARGV[0]);
-		sendMail(toString($tkHandler->msg_plain()));
+		try{
+			#sendMail(toString($tkHandler->msg_plain()));
+		} catch{
+			$tkLogger->emergency("Failed to send mail with: ".$_);
+			$tkLogger->emergency("Email ".$fname." has not been sent.");
+			exit(1);
+		};
+		#remove mail from spool
+		delMail($fname);
 	}
 }
 

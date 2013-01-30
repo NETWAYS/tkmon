@@ -3,6 +3,26 @@ INSTALLATION
 To read about a Postfix After-Queue Content Filter visit
 http://www.postfix.org/FILTER_README.html
 
+* Install Alert::Handler perl modules:
+$ perl Makefile.PL
+$ make
+$ make install
+* Install Filter
+** Copy/Create configs in /etc/tkmon
+** Change owner of configs to filter.admin
+** Copy filter to 
+$ sudo cp TKMonitor.pl /etc/postfix/filter/
+$ sudo mv TKMonitor.pl TKMonitor
+/etc/postfix/filter$ sudo chmod +x TKMonitor 
+/etc/postfix/filter$ sudo chown filter.admin TKMonitor
+** Create directory for backup mails
+/var/spool$ sudo mkdir tkmon
+/var/spool$ sudo chown filter.admin tkmon/
+** Change postfix config to
++        argv=/etc/postfix/filter/TKMonitor
+** Reload postfix
+$ sudo service postfix reload
+
 TESTING
 
 perl -I ../Alert-Handler/lib/ TKMonitor.pl < ../examples/EncALMail.txt test@example.com

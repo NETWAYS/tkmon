@@ -642,6 +642,14 @@ Updating an alert date should only affect one database row.
 
 Updating an alert status should only affect one database row.
 
+=item C<< Couldn't prepare statement: >>
+
+Calling $DB-prepare returned an error.
+
+=item C<< Couldn't execute statement: >>
+
+Calling sql statement execute returned an error.
+
 =back
 
 =head1 CONFIGURATION AND ENVIRONMENT
