@@ -104,11 +104,15 @@ sub insertAL{
 			(Sender_Email, Alert_Hash, Version, Authkey, Date, Host_Name, Host_IP,
 			Host_OS, Srv_Serial, Comp_Serial, Comp_Name, Srvc_Name, Srvc_Status,
 			Srvc_Output, Srvc_Perfdata, Srvc_Duration)
-			VALUES (?, ?, ?, ?, ?, ?, INET_ATON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?)" );
+			VALUES (?, ?, ?, ?, ?, ?, INET_ATON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?)" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
 	my $rv = $sth->execute($ALSender,$alert->alertHash(),$alert->version(),$alert->authkey(),strToMysqlTime($alert->date()),
 			$alert->hostName(),$alert->hostIP(),$alert->hostOS(),$alert->srvSerial(),$alert->compSerial(),
 			$alert->compName(),$alert->srvcName(),$alert->srvcStatus(),$alert->srvcOutput(),
-			$alert->srvcPerfdata(),$alert->srvcDuration());
+			$alert->srvcPerfdata(),$alert->srvcDuration())
+			or confess "Couldn't execute statement: " . $sth->errstr;
+			
 	if($rv != 1){
 		confess "Affected rows for inseting AL returned wrong count.";
 	}
