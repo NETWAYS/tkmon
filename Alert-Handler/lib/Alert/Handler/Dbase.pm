@@ -105,13 +105,14 @@ sub insertAL{
 	$alert->check();
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
-			(Sender_Email, Alert_Hash, Version, Authkey, Date, Host_Name, Host_IP,
+			(Sender_Email, TKmon_Active, Alert_Hash, Version, Authkey, Date, Host_Name, Host_IP,
 			Host_OS, Srv_Serial, Comp_Serial, Comp_Name, Srvc_Name, Srvc_Status,
 			Srvc_Output, Srvc_Perfdata, Srvc_Duration)
-			VALUES (?, ?, ?, ?, ?, ?, INET_ATON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?)" )
+			VALUES (?, ?, ?, ?, ?, ?, ?, INET_ATON(?), ?, ?, ?, ?, ?, ?, ?, ?, ?)" )
 			or confess "Couldn't prepare statement: " . $DB->errstr;
 			
-	my $rv = $sth->execute($ALSender,$alert->alertHash(),$alert->version(),$alert->authkey(),strToMysqlTime($alert->date()),
+	my $rv = $sth->execute($ALSender,$alert->tkmonActive(),$alert->alertHash(),$alert->version(),
+			$alert->authkey(),strToMysqlTime($alert->date()),
 			$alert->hostName(),$alert->hostIP(),$alert->hostOS(),$alert->srvSerial(),$alert->compSerial(),
 			$alert->compName(),$alert->srvcName(),$alert->srvcStatus(),$alert->srvcOutput(),
 			$alert->srvcPerfdata(),$alert->srvcDuration())

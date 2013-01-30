@@ -87,6 +87,7 @@ sub check{
 
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
 sub alertHash { $_[0]->{alertHash} = $_[1] if defined $_[1]; $_[0]->{alertHash} }
+sub tkmonActive { $_[0]->{tkmonActive} = $_[1] if defined $_[1]; $_[0]->{tkmonActive} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
 sub date { $_[0]->{date} = $_[1] if defined $_[1]; $_[0]->{date} }
@@ -197,6 +198,12 @@ Example:
 	print unpack("H*",$alert->alertHash();
 	
 Get the calculated unique alert hash value (srvSerial + srvcName + hostName).
+
+=head2 tkmonActive
+
+States if the TKmonitoring service is active, means that the customer has
+baught the monitoing feature. The flag is initialized by the return values
+of the REST API calls, as there the service active state is checked.
 
 =head2 version
 

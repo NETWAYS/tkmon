@@ -130,19 +130,21 @@ sub handleAL{
 	
 	$self->alert($alert);
 	#call REST to check if auth key is valid
-#	my $checkAuth = valAuthKey($alert->authkey(),$alert->srvSerial());
-#	if($checkAuth eq '402'){
-#		$tkLogger->info("Payment required for ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
-#		return;
-#	}
-#	if($checkAuth eq '403'){
-#		$tkLogger->info("Not a valid auth/serial combi: ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
-#		return;
-#	}
+	my $checkAuth = valAuthKey($alert->authkey(),$alert->srvSerial());
+	if($checkAuth eq '200'){
+		$self->alert()->tkmonActive(1);
+	}	
+	if($checkAuth eq '402'){
+		$self->logger()->info("Payment required for ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
+		$self->alert()->tkmonActive(0);
+	}
+	if($checkAuth eq '403'){
+		$self->logger()->emergency("Not a valid auth/serial combi: ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
+		return;
+	}
 	my ($mysqlCfg,$DBCon) = $self->initMysql('alerts');
 	
 	#TODO Check when an email must be sent
-	
 	my ($ret,$fetchedStatus) = ALIsDuplicate($DBCon,$mysqlCfg->{'table'},$alert);
 	#found a duplicate
 	if($ret == 1){
@@ -183,7 +185,15 @@ sub genALMail{
 	#replace the body with decrypted XML
 	replaceBody($self->msg_plain,$self->xml);
 	#replace subject with alert ID string
-	replaceSubject($self->msg_plain,$self->alert()->ID_str());
+	my $subject = $self->alert()->ID_str();
+	#add current service information to subject
+	if($self->alert()->tkmonActive() == 0){
+		$subject .= "- Service: Invalid"
+	}
+	if($self->alert()->tkmonActive() == 1){
+		$subject .= "- Service: Valid"
+	}
+	replaceSubject($self->msg_plain,$subject);
 }
 
 
