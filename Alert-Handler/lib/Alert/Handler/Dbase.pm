@@ -79,8 +79,12 @@ sub insertHB{
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
 			(Sender_Email, Version, Authkey, Date)
-			VALUES (?, ?, ?, ?)" );
-	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate));
+			VALUES (?, ?, ?, ?)" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate))
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	if($rv != 1){
 		confess "Affected rows for inseting HB returned wrong count.";
 	}
@@ -169,8 +173,12 @@ sub updateHBDate{
 			UPDATE $DBTable
 			SET Date = ?
 			WHERE Version = ?
-			AND Authkey = ?" );
-	my $rv = $sth->execute(strToMysqlTime($newDate),$HBVersion,$HBAuthkey);
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
+	my $rv = $sth->execute(strToMysqlTime($newDate),$HBVersion,$HBAuthkey)
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	if($rv != 1){
 		confess "Affected rows for updating HB Date returned wrong count.";
 	}
@@ -191,8 +199,12 @@ sub getHBDateDB{
 			SELECT Date
 			FROM $DBTable
 			WHERE Version = ?
-			AND Authkey = ?" );
-	my $rv = $sth->execute($HBVersion,$HBAuthkey);
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($HBVersion,$HBAuthkey)
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	#the heartbeat is not in the table yet
 	if($sth->rows == 0){
 		return undef;
@@ -256,8 +268,12 @@ sub getALValsDB{
 	my $sth = $DB->prepare( "
 			SELECT Alert_Hash, Date, Srvc_Status
 			FROM $DBTable
-			WHERE Alert_Hash = ?" );
-	my $rv = $sth->execute($alert->alertHash());
+			WHERE Alert_Hash = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($alert->alertHash())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	#the alert is not in the table yet
 	if($sth->rows == 0){
 		return undef;
@@ -285,8 +301,12 @@ sub delALDB{
 	}
 	my $sth = $DB->prepare( "
 			DELETE FROM $DBTable
-			WHERE Alert_Hash = ?" );
-	my $rv = $sth->execute($alert->alertHash());
+			WHERE Alert_Hash = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
+	my $rv = $sth->execute($alert->alertHash())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	if($rv != 1){
 		confess "Affected rows for deleting AL returned wrong count.";
 	}
@@ -305,8 +325,12 @@ sub updateALDate{
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Date = ?
-			WHERE Alert_Hash = ?");
-	my $rv = $sth->execute(strToMysqlTime($alert->date()),$alert->alertHash());
+			WHERE Alert_Hash = ?")
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
+	my $rv = $sth->execute(strToMysqlTime($alert->date()),$alert->alertHash())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	if($rv != 1){
 		confess "Affected rows for updating AL Date returned wrong count.";
 	}
@@ -325,8 +349,12 @@ sub updateALStatus{
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Srvc_Status = ?
-			WHERE Alert_Hash = ?");
-	my $rv = $sth->execute($alert->srvcStatus(),$alert->alertHash());
+			WHERE Alert_Hash = ?")
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($alert->srvcStatus(),$alert->alertHash())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
 	if($rv != 1){
 		confess "Affected rows for updating AL status returned wrong count.";
 	}
