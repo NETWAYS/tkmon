@@ -5,7 +5,6 @@ use strict;
 use Carp;
 use DBI;
 use Config::IniFiles;
-use Try::Tiny;
 use version;
 
 use Alert::Handler::Converters;
@@ -134,12 +133,8 @@ sub HBIsDuplicate{
 			confess "Cannot select empty HB values from database.";
 		}
 	#now check if date differs
-	my $fetchedDate = try{
-		getHBDateDB($DB,$DBTable,$HBVersion,$HBAuthkey);
-	} catch{
-		"Failed to get HB date with: ".$_;
-	};
-	
+	my $fetchedDate = getHBDateDB($DB,$DBTable,$HBVersion,$HBAuthkey);
+
 	#HB is not in table yet
 	if(!defined($fetchedDate)){
 		return 0;
@@ -200,7 +195,7 @@ sub getHBDateDB{
 	}
 	#more than 1 HB - duplicate checking has not worked correctly 
 	if($sth->rows != 1){
-		croak "Warning - Already a duplicate HB in DB.";
+		confess "Already a duplicate HB in DB.";
 	}
 	my $fetchedDate;
 	$rv = $sth->bind_columns(\$fetchedDate);
@@ -220,11 +215,7 @@ sub ALIsDuplicate{
 		confess "Cannot use undefined database table";
 	}
 	#now check if Alert differs
-	my ($fetchedDate,$fetchedStatus) = try{
-		getALValsDB($DB,$DBTable,$alert);
-	} catch{
-		"Failed to get AL values from DB with: ".$_;
-	};
+	my ($fetchedDate,$fetchedStatus) = getALValsDB($DB,$DBTable,$alert);
 	
 	#AL is not in table yet
 	if(!defined($fetchedDate)){
@@ -269,7 +260,7 @@ sub getALValsDB{
 	}
 	#more than 1 Alert - duplicate checking has not worked correctly 
 	if($sth->rows != 1){
-		croak "Warning - Already a duplicate AL in DB.";
+		confess "Already a duplicate AL in DB.";
 	}
 	my ($fetchedDate, $fetchedStatus);
 	$rv = $sth->bind_col(2,\$fetchedDate);
@@ -508,11 +499,7 @@ Return values:
 
 Example:
 
-	my ($fetchedDate,$fetchedStatus) = try{
-		getALValsDB($DB,$DBTable,$alert);
-	} catch{
-		"Failed to get AL values from DB with: ".$_;
-	};
+	my ($fetchedDate,$fetchedStatus) = getALValsDB($DB,$DBTable,$alert);
 	
 Fetches date and state from the database. Parameters: Database handle,
 Database table, alert object. Takes the alert unique hash value and fetches
@@ -640,7 +627,6 @@ config hash.
 	use Carp;
 	use DBI;
 	use Config::IniFiles;
-	use Try::Tiny;
 	use version;
 	use Alert::Handler::Converters;
 	use Alert::Handler::Alert;

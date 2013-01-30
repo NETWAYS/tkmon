@@ -44,6 +44,7 @@ sub _init{
 	#generate the hash and check the xml if it is valid
 	$self->check();
 	$self->_genHash();
+	$self->_genIDStr();
 }
 
 sub _genHash{
@@ -55,6 +56,13 @@ sub _genHash{
 	if(!defined($self->alertHash())){
 		confess("Digest function returned an undefined value.");
 	}
+}
+
+sub _genIDStr{
+	my $self = shift;
+	#TODO Add customer id and warranty information
+	my $id = $self->srvSerial().'-'.$self->srvcName().'-'.$self->srvcStatus();
+	$self->ID_str($id);
 }
 
 sub check{
@@ -93,6 +101,7 @@ sub srvcStatus { $_[0]->{srvcStatus} = $_[1] if defined $_[1]; $_[0]->{srvcStatu
 sub srvcOutput { $_[0]->{srvcOutput} = $_[1] if defined $_[1]; $_[0]->{srvcOutput} }
 sub srvcPerfdata { $_[0]->{srvcPerfdata} = $_[1] if defined $_[1]; $_[0]->{srvcPerfdata} }
 sub srvcDuration { $_[0]->{srvcDuration} = $_[1] if defined $_[1]; $_[0]->{srvcDuration} }
+sub ID_str { $_[0]->{ID_str} = $_[1] if defined $_[1]; $_[0]->{ID_str} }
 
 
 1; # Magic true value required at end of module
@@ -162,6 +171,11 @@ Example:
 Generates a unique hash for the alert object. Currently SHA512 is
 used as hash function. _genHash is automatically called by _init on
 alert object documentation.
+
+=head2 _genIDStr
+
+Generates an identifiere string for the alert. Currently: server serial number +
+service name + service status.
 
 =head2 check
 
@@ -243,6 +257,10 @@ Get the performance data of the notification service.
 =head2 srvcDuration
 
 Get the duration the service check took to complete.
+
+=head2 ID_str
+
+Get the alert identifier string.
 
 =head1 DIAGNOSTICS
 

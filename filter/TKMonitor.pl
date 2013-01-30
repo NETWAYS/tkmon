@@ -4,9 +4,11 @@ use warnings;
 use Try::Tiny;
 use IO::File;
 use Carp;
+use IPC::Run3;
 
 use Alert::Handler;
 use Alert::Handler::TKLogger;
+use Alert::Handler::Email;
 
 our $FILTER_DIR = "/etc/postfix/filter";
 our $SENDMAIL = "/usr/sbin/sendmail";
@@ -21,15 +23,19 @@ my $tkLogger = Alert::Handler::TKLogger->new(
 	);
 
 #Start processing the email
-#TODO Temporarily copy email to spool directory for later investigatement
 my $msg_str;
 while(<STDIN>){
 	$msg_str .= $_;
 }
 
-#backup mail
-saveMail($msg_str,$ARGV[0]);
-
+#backup mail, keep filename to remove it at the end
+try{
+	my $fname = saveMail($msg_str,$ARGV[0]);
+} catch{
+	$tkLogger->emergency("Failed to save mail with: ".$_);
+	#TODO: Try to handle mail even without backup?
+	exit(1);
+};
 #Setup up the Handler and decrypt the email
 my $tkHandler = Alert::Handler->new(
 	sender => $ARGV[0],
@@ -86,6 +92,12 @@ if($tkHandler->xmlType() eq 'alert'){
 		$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
 		exit(1);
 	};
+	#check if mail has been generated
+	if(defined($tkHandler->msg_plain())){
+		#FIXME Remove tmp email
+		saveMail(toString($tkHandler->msg_plain()),$ARGV[0]);
+		sendMail(toString($tkHandler->msg_plain()));
+	}
 }
 
 
@@ -103,10 +115,19 @@ sub saveMail{
 	else{
 		confess "Could not save mail from ".$sender." to /var/spool/tkmon/".$fname;
 	}
-	exit(0);
-	return $time_str;
+	return $fname;
 }
 
+sub delMail{
+	my $fname = shift;
+	unlink $fname or die $!;
+}
+
+sub sendMail{
+	my $mail_str = shift;
+	my @command = ($SENDMAIL,@ARGV);
+	run3 \@command, \$mail_str;
+}
 
 
 

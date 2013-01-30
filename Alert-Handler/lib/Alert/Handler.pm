@@ -50,6 +50,7 @@ sub logCfg { $_[0]->{logCfg} = $_[1] if defined $_[1]; $_[0]->{logCfg} }
 sub logger { $_[0]->{logger} = $_[1] if defined $_[1]; $_[0]->{logger} }
 sub msg_str { $_[0]->{msg_str} = $_[1] if defined $_[1]; $_[0]->{msg_str} }
 sub msg { $_[0]->{msg} = $_[1] if defined $_[1]; $_[0]->{msg} }
+sub msg_plain { $_[0]->{msg_plain} = $_[1] if defined $_[1]; $_[0]->{msg_plain} }
 sub msgBody { $_[0]->{msgBody} = $_[1] if defined $_[1]; $_[0]->{msgBody} }
 sub xml { $_[0]->{xml} = $_[1] if defined $_[1]; $_[0]->{xml} }
 sub xml_h { $_[0]->{xml_h} = $_[1] if defined $_[1]; $_[0]->{xml_h} }
@@ -165,12 +166,24 @@ sub handleAL{
 	if($ret == 0){
 		insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
 		$self->logger()->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
+		#TODO Check if email must be sent, if yes call genALMail
+		$self->genALMail();
 	}
 	if($ret == -1){
 		$self->logger()->info("AL with same timestamp already in DB: ".$self->sender().', '.$alert->authkey());
 	}
 	closeConnection($DBCon);
 	return;
+}
+
+sub genALMail{
+	my $self = shift;
+	#first copy the email
+	$self->msg_plain(duplicateEmail($self->msg));
+	#replace the body with decrypted XML
+	replaceBody($self->msg_plain,$self->xml);
+	#replace subject with alert ID string
+	replaceSubject($self->msg_plain,$self->alert()->ID_str());
 }
 
 

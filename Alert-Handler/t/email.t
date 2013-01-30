@@ -42,7 +42,9 @@ The quick brown fox jumps over the lazy dog.';
 my $email = parseEmailStr($email_str);
 
 is(getSubject($email), 'TK-Monitoring Test E-Mail');
-my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
+my $modifiedEmail = duplicateEmail($email);
+replaceSubject($modifiedEmail,'TK-Monitoring modified Subject');
 is(getSubject($modifiedEmail), 'TK-Monitoring modified Subject');
 is(getBody($email), 'The quick brown fox jumps over the lazy dog.');
-is(getBody($modifiedEmail), 'The quick brown fox jumps over the lazy dog.');
+replaceBody($modifiedEmail,'The quick orange fox jumps over the lazy dog.');
+is(getBody($modifiedEmail), 'The quick orange fox jumps over the lazy dog.');

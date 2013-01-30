@@ -11,7 +11,8 @@ our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(parseEmailStr getSubject replaceSubject getBody toString); # symbols to export
+	@EXPORT = qw(parseEmailStr getSubject getBody duplicateEmail replaceSubject 
+		replaceBody toString); # symbols to export
 }
 
 sub parseEmailStr{
@@ -37,14 +38,24 @@ sub getBody{
 	return $msg->body;
 }
 
+sub duplicateEmail{
+	my $msg = shift;
+	my $dupMsg = Email::Simple->new($msg->as_string());
+	return $dupMsg;
+}
+
 sub replaceSubject{
 	my $msg = shift;
 	my $newSubj = shift;
-	
-	#copy the original one
-	my $modMsg = Email::Simple->new($msg->as_string());
-	$modMsg->header_set("Subject", $newSubj);
-	return $modMsg;
+	$msg->header_set("Subject", $newSubj);
+	return;
+}
+
+sub replaceBody{
+	my $msg = shift;
+	my $newBody = shift;
+	$msg->body_set($newBody);
+	return;
 }
 
 sub toString{
@@ -110,15 +121,31 @@ Example:
 Returns the body of the given msg object $email - $email is an object
 returned by parseEmailStr.
 
+=head2 duplicateEmail
+
+Example:
+
+	my $dupEmail = duplicateEmail($email);
+	
+Duplicates/Copies an email (Email::Simple) into a new Email::Simple object.
+
 =head2 replaceSubject
 
 Example:
 
-	my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');
+	replaceSubject($email,'TK-Monitoring modified Subject');
 
 Replaces the subject of the given msg object $email with the second parameter.
-$email is an object returned by parseEmailStr, the function returns a new msg object
-with the modified subject.
+$email is an object returned by parseEmailStr.
+
+=head2 replaceBody
+
+Example:
+
+	replaceBody($email,'TK-Monitoring modified Body');
+
+Replaces the body of the given msg object $email with the second parameter.
+$email is an object returned by parseEmailStr.
 
 =head2 toString
 
