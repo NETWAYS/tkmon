@@ -217,7 +217,7 @@ Example:
 		$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);
 		exit(1);
 	};
-	
+
 =head1 DESCRIPTION
 
 Alert::Handler parses an email, exctracts the xml, parses the xml and
@@ -358,7 +358,6 @@ must be updated in the database, if the alert can be deleted due to a service
 recover, or if the alert is new and has to be inserted into the database.
 Also loggs if an alert with the same timestamp is already in the dubplicate database.
 
-
 =head2 handleAL
 
 Example:
@@ -368,10 +367,22 @@ Example:
 	} catch{
 		$tkLogger->emergency("Failed to handle AL with: ".$_);
 	};
+
 Handles an alert object - checks if the auth key is valid, if the timestamp
 must be updated in the database or if the heartbeat has to be inserted into the
 database. Also loggs if a heartbeat with the same timestamp is already in the
 dubplicate database.
+
+=head2 genALMail
+
+Example:
+
+	$self->genALMail();
+	print toString($self->msg_plain());
+	
+Generates a modified email: the subject is filled with the alert's most important
+information, the body becomes the decrypted xml. msg_plain contains the new email
+as Email::Simple object.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

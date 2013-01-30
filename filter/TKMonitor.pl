@@ -48,12 +48,13 @@ try{
 	$tkHandler->parseMsgStr();
 	$tkHandler->decryptXml();
 } catch{
+	#TODO Remove backup mail in spool?
 	$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);
 	exit(1);
 };
 #Check if the email body is not empty
 if(!defined($tkHandler->xml())){
-#Log which mail has been discarded
+	#Log which mail has been discarded
 	$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded,
 	no valid body found.");
 	exit(0);
