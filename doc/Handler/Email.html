@@ -21,7 +21,11 @@
 
 </A><LI><A HREF="#getBody">getBody
 
+</A><LI><A HREF="#duplicateEmail">duplicateEmail
+
 </A><LI><A HREF="#replaceSubject">replaceSubject
+
+</A><LI><A HREF="#replaceBody">replaceBody
 
 </A><LI><A HREF="#toString">toString
 
@@ -112,6 +116,19 @@ returned by parseEmailStr.
 <P>Returns the body of the given msg object $email - $email is an object
 returned by parseEmailStr.
 
+</P><H2><A NAME="duplicateEmail">duplicateEmail
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $dupEmail = duplicateEmail($email);
+	
+</PRE>
+
+<P>Duplicates/Copies an email (Email::Simple) into a new Email::Simple object.
+
 </P><H2><A NAME="replaceSubject">replaceSubject
 
 </A></H2>
@@ -119,11 +136,22 @@ returned by parseEmailStr.
 <P>Example:
 
 </P>
-<PRE>	my $modifiedEmail = replaceSubject($email,'TK-Monitoring modified Subject');</PRE>
+<PRE>	replaceSubject($email,'TK-Monitoring modified Subject');</PRE>
 
 <P>Replaces the subject of the given msg object $email with the second parameter.
-$email is an object returned by parseEmailStr, the function returns a new msg object
-with the modified subject.
+$email is an object returned by parseEmailStr.
+
+</P><H2><A NAME="replaceBody">replaceBody
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	replaceBody($email,'TK-Monitoring modified Body');</PRE>
+
+<P>Replaces the body of the given msg object $email with the second parameter.
+$email is an object returned by parseEmailStr.
 
 </P><H2><A NAME="toString">toString
 

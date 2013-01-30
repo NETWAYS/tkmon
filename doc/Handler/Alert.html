@@ -21,6 +21,8 @@
 
 </A><LI><A HREF="#_genHash">_genHash
 
+</A><LI><A HREF="#_genIDStr">_genIDStr
+
 </A><LI><A HREF="#check">check
 
 </A><LI><A HREF="#xmlRoot">xmlRoot
@@ -54,6 +56,8 @@
 </A><LI><A HREF="#srvcPerfdata">srvcPerfdata
 
 </A><LI><A HREF="#srvcDuration">srvcDuration
+
+</A><LI><A HREF="#ID_str">ID_str
 
 </A></UL>
 <LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
@@ -157,6 +161,13 @@ in the database.
 <P>Generates a unique hash for the alert object. Currently SHA512 is
 used as hash function. _genHash is automatically called by _init on
 alert object documentation.
+
+</P><H2><A NAME="_genIDStr">_genIDStr
+
+</A></H2>
+
+<P>Generates an identifiere string for the alert. Currently: server serial number +
+service name + service status.
 
 </P><H2><A NAME="check">check
 
@@ -281,6 +292,12 @@ assigned to the alert object.
 </A></H2>
 
 <P>Get the duration the service check took to complete.
+
+</P><H2><A NAME="ID_str">ID_str
+
+</A></H2>
+
+<P>Get the alert identifier string.
 
 </P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
 

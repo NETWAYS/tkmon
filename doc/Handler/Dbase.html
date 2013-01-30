@@ -270,11 +270,7 @@ is not in the database.
 <P>Example:
 
 </P>
-<PRE>	my ($fetchedDate,$fetchedStatus) = try{
-		getALValsDB($DB,$DBTable,$alert);
-	} catch{
-		&quot;Failed to get AL values from DB with: &quot;.$_;
-	};
+<PRE>	my ($fetchedDate,$fetchedStatus) = getALValsDB($DB,$DBTable,$alert);
 	
 </PRE>
 
@@ -448,6 +444,20 @@ Updating an alert date should only affect one database row.
 Updating an alert status should only affect one database row.
 
 </DD>
+<DT><A NAME="Couldn't%20prepare%20statement%3a"><CODE>Couldn't prepare statement:</CODE>
+
+</A></DT>
+<DD>
+Calling $DB-prepare returned an error.
+
+</DD>
+<DT><A NAME="Couldn't%20execute%20statement%3a"><CODE>Couldn't execute statement:</CODE>
+
+</A></DT>
+<DD>
+Calling sql statement execute returned an error.
+
+</DD>
 </DL>
 <H1><A NAME="CONFIGURATION%20AND%20ENVIRONMENT">CONFIGURATION AND ENVIRONMENT
 
@@ -468,7 +478,6 @@ config hash.
 	use Carp;
 	use DBI;
 	use Config::IniFiles;
-	use Try::Tiny;
 	use version;
 	use Alert::Handler::Converters;
 	use Alert::Handler::Alert;</PRE>
