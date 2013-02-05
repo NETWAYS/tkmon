@@ -13,7 +13,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(parseEmailStr getSubject getBody duplicateEmail replaceSubject 
-		replaceBody toString); # symbols to export
+		replaceBody toString sendEmail); # symbols to export
 }
 
 sub parseEmailStr{
