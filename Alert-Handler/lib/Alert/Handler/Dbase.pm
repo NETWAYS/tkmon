@@ -16,7 +16,8 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus); # symbols to export
+	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
+	delDupsDB); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -57,6 +58,17 @@ sub closeConnection{
 	}
 }
 
+sub checkDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	if(!defined($DB)){
+		confess "Cannot use undefined database handle";
+	}
+	if(!defined($DBTable)){
+		confess "Cannot use undefined database table";
+	}
+}
+
 sub insertHB{
 	my $DB = shift;
 	my $DBTable = shift;
@@ -65,12 +77,8 @@ sub insertHB{
 	my $HBAuthkey = shift;
 	my $HBDate = shift;
 	
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	checkDB($DB,$DBTable);
+
 	if(!defined($HBVersion) ||
 		!defined($HBAuthkey) ||
 		!defined($HBDate)){
@@ -96,12 +104,8 @@ sub insertAL{
 	my $ALSender = shift;
 	my $alert = shift;
 	
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	checkDB($DB,$DBTable);
+
 	$alert->check();
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
@@ -130,12 +134,8 @@ sub HBIsDuplicate{
 	my $HBAuthkey = shift;
 	my $HBDate = shift;
 	
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	checkDB($DB,$DBTable);
+	
 	if(!defined($HBVersion) ||
 		!defined($HBAuthkey) ||
 		!defined($HBDate)){
@@ -164,12 +164,9 @@ sub updateHBDate{
 	my $newDate = shift;
 	my $HBVersion = shift;
 	my $HBAuthkey = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Date = ?
@@ -190,12 +187,9 @@ sub getHBDateDB{
 	my $DBTable = shift;
 	my $HBVersion = shift;
 	my $HBAuthkey = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			SELECT Date
 			FROM $DBTable
@@ -225,12 +219,8 @@ sub ALIsDuplicate{
 	my $DBTable = shift;
 	my $alert = shift;
 	
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	checkDB($DB,$DBTable);
+	
 	#now check if Alert differs
 	my ($fetchedDate,$fetchedStatus) = getALValsDB($DB,$DBTable,$alert);
 	
@@ -260,12 +250,9 @@ sub getALValsDB{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $alert = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			SELECT Alert_Hash, Date, Srvc_Status
 			FROM $DBTable
@@ -294,12 +281,9 @@ sub delALDB{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $alert = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			DELETE FROM $DBTable
 			WHERE Alert_Hash = ?" )
@@ -317,12 +301,9 @@ sub updateALDate{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $alert = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Date = ?
@@ -341,12 +322,9 @@ sub updateALStatus{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $alert = shift;
-	if(!defined($DB)){
-		confess "Cannot use undefined database handle";
-	}
-	if(!defined($DBTable)){
-		confess "Cannot use undefined database table";
-	}
+	
+	checkDB($DB,$DBTable);
+	
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Srvc_Status = ?
@@ -359,6 +337,28 @@ sub updateALStatus{
 	if($rv != 1){
 		confess "Affected rows for updating AL status returned wrong count.";
 	}
+}
+
+sub delDupsDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $interval = shift;
+
+	checkDB($DB,$DBTable);
+	if(!defined($interval)){
+		confess "Cannot use empty interval.";
+	}
+	if(!($interval =~ m/^[0-9]* [a-zA-Z]*$/)){
+		confess "Given interval contains invalid characters.";
+	}
+	my $sth = $DB->prepare( "
+			DELETE FROM $DBTable
+			WHERE DATE < 
+			DATE_SUB( NOW( ) , INTERVAL ".$interval." )")
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute()
+	or confess "Couldn't execute statement: " . $sth->errstr;
 }
 
 1; # Magic true value required at end of module
@@ -434,6 +434,10 @@ Example:
 	closeConnection($DBCon);
 
 Closes an open database connection by the given handle.
+
+=head2 checkDB
+
+Checks if the database parameters are defined.
 
 =head2 insertHB
 
@@ -650,6 +654,16 @@ Calling $DB-prepare returned an error.
 =item C<< Couldn't execute statement: >>
 
 Calling sql statement execute returned an error.
+
+=item C<< Cannot use empty interval. >>
+
+Deleting duplicates from the DB requires an interval to specify the entries older
+than this parameter should be deleted.
+
+=item C<< Given interval contains invalid characters. >>
+
+Deleting duplicates checks the given interval: e.g. 1 Day, 24 Hours. Other
+characters are not allowed.
 
 =back
 
