@@ -6,6 +6,7 @@ use Try::Tiny;
 use Alert::Handler;
 use Alert::Handler::TKLogger;
 use Alert::Handler::Dbase;
+use Alert::Handler::Email;
 
 my $tkLogger = Alert::Handler::TKLogger->new(
 		cfgPath => './Logger.cfg'
@@ -27,16 +28,16 @@ $interval = '50 Hour';
 my $mails = getEmailAdrDB($DBCon,$mysqlCfg->{'table'},$interval);
 use Data::Dumper;
 print Dumper($mails);
-
-
-
-
 closeConnection($DBCon);
 
-
-
-
-
+my $msg = "test email from perl sendmail";
+my $mailToSend = {
+	from => 'monitor@thomas-krenn.com',
+	to => 'gschoenberger@thomas-krenn.com',
+	msg => $msg,
+	smtp => 'zimbra.thomas-krenn.com'
+	};
+sendEmail($mailToSend);
 
 sub getDBConn{
 	my $cfgPath = shift;

@@ -19,6 +19,7 @@ WriteMakefile(
         'Config::IniFiles' => 0,
         'Digest::SHA' => 0,
         'IPC::Run3' => 0,
+        'Mail::Sendmail' => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Alert-Handler-*' },

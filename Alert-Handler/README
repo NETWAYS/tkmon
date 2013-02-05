@@ -22,11 +22,13 @@ DEPENDENCIES
 	use XML::Bare;
 	use Email::Simple;
 	use Config::IniFiles;
+	use Mail::Sendmail;
 	
 On debian based systems install:
 	libcrypt-gpg-perl libwww-curl-perl libxml-bare-perl
 	libemail-simple-perl liblog-dispatch-perl libdbi-perl libconfig-inifiles-perl
 	libdatetime-format-strptime-perl libdatetime-format-mysql-perl libipc-run3-perl
+	libmail-sendmail-perl
 
 DOCUMENTATION
 

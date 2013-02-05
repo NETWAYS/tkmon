@@ -5,6 +5,7 @@ use strict;
 use Carp;
 use version;
 use Email::Simple;
+use Mail::Sendmail;
 
 our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
@@ -63,6 +64,19 @@ sub toString{
 	if(!defined($msg)){confess "Cannot parse an undefined msg.";}
 	return $msg->as_string();
 }
+
+sub sendEmail{
+	my %params = %{(shift)};
+	my %mail = (
+		To => $params{to},
+		From => $params{from},
+		Message => $params{msg}
+	);
+	$mail{smtp} = $params{smtp};
+	sendmail(%mail)
+	or confess $Mail::Sendmail::error;
+}
+
 
 1; # Magic true value required at end of module
 __END__
