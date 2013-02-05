@@ -36,7 +36,7 @@ catch{
 };
 #send emails to each mail address
 my $msg = "Attention: TKmonitor did not receive any heartbeat for more than 
-50 hours. Pleas check your TKmonitor setup or contact support.";
+50 hours. Please check your TKmonitor setup or contact support.";
 
 foreach my $email (@$mails){
 	try{
