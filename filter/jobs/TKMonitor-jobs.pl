@@ -10,16 +10,29 @@ use Alert::Handler::Dbase;
 my $tkLogger = Alert::Handler::TKLogger->new(
 		cfgPath => './Logger.cfg'
 	);
-my $cfgPath = './MysqlConf.cfg';
+my $cfgPath = '../../mysql/MysqlConfig.cfg';
 
 #get DB connection for deleting hearbeat duplicates
 my ($mysqlCfg,$DBCon) = getDBConn($cfgPath,'heartbeats');
+
+#FIXME Keep duplicates 1 Week?
 my $interval = '1 Day';
-delDupsDB($DBCon,$mysqlCfg->{'table'},$interval);
-#read config to delete alert duplicates, we can use the same db connection here
-$mysqlCfg = readMysqlCfg($cfgPath,'alerts');
-delDupsDB($DBCon,$mysqlCfg->{'table'},$interval);
+#delDupsDB($DBCon,$mysqlCfg->{'table'},$interval);
+##read config to delete alert duplicates, we can use the same db connection here
+#$mysqlCfg = readMysqlCfg($cfgPath,'alerts');
+#delDupsDB($DBCon,$mysqlCfg->{'table'},$interval);
+
+#get email adresses for reminders
+$interval = '50 Hour';
+my $mails = getEmailAdrDB($DBCon,$mysqlCfg->{'table'},$interval);
+use Data::Dumper;
+print Dumper($mails);
+
+
+
+
 closeConnection($DBCon);
+
 
 
 

@@ -17,7 +17,7 @@ BEGIN {
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
 	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
-	delDupsDB); # symbols to export
+	delDupsDB getEmailAdrDB); # symbols to export
 }
 
 sub readMysqlCfg{
@@ -361,6 +361,39 @@ sub delDupsDB{
 	or confess "Couldn't execute statement: " . $sth->errstr;
 }
 
+sub getEmailAdrDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $interval = shift;
+
+	checkDB($DB,$DBTable);
+	if(!defined($interval)){
+		confess "Cannot use empty interval.";
+	}
+	if(!($interval =~ m/^[0-9]* [a-zA-Z]*$/)){
+		confess "Given interval contains invalid characters.";
+	}
+	my $sth = $DB->prepare( "
+			SELECT Sender_Email FROM $DBTable
+			WHERE DATE < 
+			DATE_SUB( NOW( ) , INTERVAL ".$interval." )")
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute()
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	#nothing has been returned
+	if($sth->rows == 0){
+		return undef;
+	}
+	my ($fetchedMail);
+	$rv = $sth->bind_col(1,\$fetchedMail);
+	my @mailAdresses;
+	while($sth->fetch){
+		push @mailAdresses,$fetchedMail
+	}
+	return \@mailAdresses;
+}
+
 1; # Magic true value required at end of module
 __END__
 
@@ -568,6 +601,25 @@ Example:
 
 Update the service status for the alert. Paramerters: Database handle, Database table,
 alert object. As update the service status from the alert object is taken.
+
+=head2 delDupsDB
+
+Example:
+
+	my $interval = '1 Day';
+	delDupsDB($DBCon,$mysqlCfg->{'table'},$interval);
+
+Deletes all entries from the database table that are older than $interval.
+
+=head2 getEmailAdrDB
+
+Example:
+
+	$interval = '50 Hour';
+	my $mails = getEmailAdrDB($DBCon,$mysqlCfg->{'table'},$interval);
+
+Fetches the email adress from entries whose date is older than $interval. Returns
+an array reference containing all addresses.
 
 =head1 DIAGNOSTICS
 
