@@ -70,6 +70,7 @@ sub sendEmail{
 	my %mail = (
 		To => $params{to},
 		From => $params{from},
+		Subject => $params{subject},
 		Message => $params{msg}
 	);
 	$mail{smtp} = $params{smtp};
