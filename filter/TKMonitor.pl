@@ -104,14 +104,14 @@ if($tkHandler->xmlType() eq 'alert'){
 			$tkLogger->emergency("Email ".$fname." has not been sent.");
 			exit(1);
 		};
-		#remove mail from spool
-		try{
-			delMail($fname);
-		} catch{
-			$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
-		};
-		exit(1);
 	}
+	#remove mail from spool
+	try{
+		delMail($fname);
+	} catch{
+		$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
+		exit(1);
+	};
 }
 
 
