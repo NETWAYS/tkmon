@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 use Alert::Handler::Xml;
 use Alert::Handler::Heartbeat;
@@ -68,7 +68,7 @@ PS Status = 'Presence detected' (Status: Nominal)</plugin-output>
 	</service>
 </alert>";
 
-$hb_h = parseXmlFile('../examples/FilterAL.xml');
+$hb_h = parseXmlText($xml_str);
 my $alert = Alert::Handler::Alert->new(
 	xmlRoot => $hb_h
 );
@@ -104,7 +104,7 @@ is($alert->srvcOutput(),$output, 'alert service output');
 $output = "'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38";
 is($alert->srvcPerfdata(),$output, 'alert service perfdata output');
 is($alert->srvcDuration(),'1.196 seconds','alert service duration');
-
+is($alert->ID_str(),'9000088123-IPMI-OK','alert ID string');
 is(unpack("H*",$alert->alertHash()),'4a5e560b1377603a2107c3b8bde60237a15a501c3c98f2e5c35454ef63963e9344cf284c07daad1548da36fa28174f03b82e46d3bab8deb182de9781ce375a53','alert sha512 hash');
 
 

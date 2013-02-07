@@ -6,6 +6,7 @@ use Carp;
 use version;
 use Log::Dispatch;
 use Log::Dispatch::File;
+use Config::IniFiles;
 
 our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
@@ -173,6 +174,7 @@ must be specified when calling the constructor.
 	use version;
 	use Log::Dispatch;
 	use Log::Dispatch::File;
+	use Config::IniFiles;
 
 =head1 AUTHOR
 
