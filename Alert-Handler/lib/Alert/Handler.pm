@@ -163,6 +163,7 @@ sub handleAL{
 			updateALStatus($DBCon,$mysqlCfg->{'table'},$alert);
 			$self->logger()->info("Updating AL status: ".$self->sender().', '.$alert->authkey());
 		}
+		$self->genALMail();
 	}
 	#AL not in DB
 	if($ret == 0){

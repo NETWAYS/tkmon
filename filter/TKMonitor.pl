@@ -97,8 +97,7 @@ if($tkHandler->xmlType() eq 'alert'){
 	if(defined($tkHandler->msg_plain())){
 		saveMail(toString($tkHandler->msg_plain()),$ARGV[0]);
 		try{
-			#FIXME
-			#sendMail(toString($tkHandler->msg_plain()));
+			sendMail(toString($tkHandler->msg_plain()));
 		} catch{
 			$tkLogger->emergency("Failed to send mail with: ".$_);
 			$tkLogger->emergency("Email ".$fname." has not been sent.");
