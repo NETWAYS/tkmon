@@ -104,7 +104,11 @@ if($tkHandler->xmlType() eq 'alert'){
 			exit(1);
 		};
 		#remove mail from spool
-		delMail($fname);
+		try{
+			delMail($fname);
+		}
+		$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
+		exit(1);
 	}
 }
 
