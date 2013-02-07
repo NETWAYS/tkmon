@@ -13,14 +13,17 @@ my $tkLogger = Alert::Handler::TKLogger->new(
 	);
 	
 my $cfgPath = '../../mysql/MysqlConfig.cfg';
-my ($HBCfg,$DBCon) = getDBConn($cfgPath,'heartbeats');
+my ($ALCfg,$DBCon) = getDBConn($cfgPath,'alerts');
 
-#delete entries from duplicate DB
+#delete entries from duplicate DB for alerts
 my $interval = '1 Day';
-#delDupsDB($DBCon,$HBCfg->{'table'},$interval);
-my $ALCfg = readMysqlCfg($cfgPath,'alerts');
-#delDupsDB($DBCon,$ALCfg->{'table'},$interval);
+try{
+	delDupsDB($DBCon,$ALCfg->{'table'},$interval);
+} catch{
+	$tkLogger->emergency("Failed to delete alert duplicate DB with: ".$_);
+};
 
+my $HBCfg = readMysqlCfg($cfgPath,'heartbeats');
 my $mails;#which customers to send mail to
 my $mailsSupport;#list of emails to send to support
 try{
@@ -46,7 +49,7 @@ foreach my $email (@$mails){
 		$tkLogger->emergency("Failed to send HB reminder email to $email with: ".$_);
 	};
 }
-$msg = "The following TKmonitoring system have not sent any heartbeats for more than 
+$msg = "The following TKmonitoring systems have not sent any heartbeats for more than 
 75 hours:\n";
 #FIXME Insert email address from TK support
 my $suppEmail = 'gschoenberger@thomas-krenn.com';
