@@ -95,6 +95,7 @@ if($tkHandler->xmlType() eq 'alert'){
 	};
 	#check if mail has been generated
 	if(defined($tkHandler->msg_plain())){
+		#save the plaintext mail
 		saveMail(toString($tkHandler->msg_plain()),$ARGV[0]);
 		try{
 			sendMail(toString($tkHandler->msg_plain()));
@@ -106,8 +107,9 @@ if($tkHandler->xmlType() eq 'alert'){
 		#remove mail from spool
 		try{
 			delMail($fname);
-		}
-		$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
+		} catch{
+			$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
+		};
 		exit(1);
 	}
 }
