@@ -16,7 +16,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
+	updateHBDate getHBDateDB delHBDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
 	delDupsDB getEmailAdrDB); # symbols to export
 }
 
@@ -179,6 +179,28 @@ sub updateHBDate{
 	
 	if($rv != 1){
 		confess "Affected rows for updating HB Date returned wrong count.";
+	}
+}
+
+sub delHBDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+
+	checkDB($DB,$DBTable);
+	
+	my $sth = $DB->prepare( "
+			DELETE FROM $DBTable
+			WHERE Version = ?
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($HBVersion,$HBAuthkey)
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
+	if($rv != 1){
+		confess "Affected rows for deleting HB returned wrong count.";
 	}
 }
 
