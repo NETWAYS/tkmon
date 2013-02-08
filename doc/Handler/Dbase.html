@@ -21,6 +21,8 @@
 
 </A><LI><A HREF="#closeConnection">closeConnection
 
+</A><LI><A HREF="#checkDB">checkDB
+
 </A><LI><A HREF="#insertHB">insertHB
 
 </A><LI><A HREF="#insertAL">insertAL
@@ -28,6 +30,8 @@
 </A><LI><A HREF="#HBIsDuplicate">HBIsDuplicate
 
 </A><LI><A HREF="#updateHBDate">updateHBDate
+
+</A><LI><A HREF="#delHBDB">delHBDB
 
 </A><LI><A HREF="#getHBDate">getHBDate
 
@@ -40,6 +44,10 @@
 </A><LI><A HREF="#updateALDate">updateALDate
 
 </A><LI><A HREF="#updateALStatus">updateALStatus
+
+</A><LI><A HREF="#delDupsDB">delDupsDB
+
+</A><LI><A HREF="#getEmailAdrDB">getEmailAdrDB
 
 </A></UL>
 <LI><A HREF="#DIAGNOSTICS">DIAGNOSTICS
@@ -146,6 +154,12 @@ On Success returns a valid database handle else raises an error.
 
 <P>Closes an open database connection by the given handle.
 
+</P><H2><A NAME="checkDB">checkDB
+
+</A></H2>
+
+<P>Checks if the database parameters are defined.
+
 </P><H2><A NAME="insertHB">insertHB
 
 </A></H2>
@@ -225,7 +239,20 @@ insertAL uses Alert::Handler::Converters to convert the date to a mysql valid fo
 	-The new date time
 	-The HB version
 	-The HB authkey</PRE>
-<H2><A NAME="getHBDate">getHBDate
+<H2><A NAME="delHBDB">delHBDB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	delHBDB($con,$cfg-&gt;{'table'},$heartbeat-&gt;version(),$heartbeat-&gt;authkey());
+	
+</PRE>
+
+<P>Deletes a heartbeat from the database.
+
+</P><H2><A NAME="getHBDate">getHBDate
 
 </A></H2>
 
@@ -315,6 +342,31 @@ alert object. As update the date from the alert object is taken.
 
 <P>Update the service status for the alert. Paramerters: Database handle, Database table,
 alert object. As update the service status from the alert object is taken.
+
+</P><H2><A NAME="delDupsDB">delDupsDB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	my $interval = '1 Day';
+	delDupsDB($DBCon,$mysqlCfg-&gt;{'table'},$interval);</PRE>
+
+<P>Deletes all entries from the database table that are older than $interval.
+
+</P><H2><A NAME="getEmailAdrDB">getEmailAdrDB
+
+</A></H2>
+
+<P>Example:
+
+</P>
+<PRE>	$interval = '50 Hour';
+	my $mails = getEmailAdrDB($DBCon,$mysqlCfg-&gt;{'table'},$interval);</PRE>
+
+<P>Fetches the email adress from entries whose date is older than $interval. Returns
+an array reference containing all addresses.
 
 </P><H1><A NAME="DIAGNOSTICS">DIAGNOSTICS
 
@@ -456,6 +508,22 @@ Calling $DB-prepare returned an error.
 </A></DT>
 <DD>
 Calling sql statement execute returned an error.
+
+</DD>
+<DT><A NAME="Cannot%20use%20empty%20interval."><CODE>Cannot use empty interval.</CODE>
+
+</A></DT>
+<DD>
+Deleting duplicates from the DB requires an interval to specify the entries older
+than this parameter should be deleted.
+
+</DD>
+<DT><A NAME="Given%20interval%20contains%20invalid%20characters."><CODE>Given interval contains invalid characters.</CODE>
+
+</A></DT>
+<DD>
+Deleting duplicates checks the given interval: e.g. 1 Day, 24 Hours. Other
+characters are not allowed.
 
 </DD>
 </DL>
