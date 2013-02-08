@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 14;
+use Test::More tests => 37;
 
 use Alert::Handler::Dbase;
 use Alert::Handler::Xml;
@@ -40,8 +40,85 @@ is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey())
 	strToMysqlTime('Fri Oct 12 04:54:34 2012'),'fetching modified HB Date');
 is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey(),
 	$heartbeat->date()),1,'HB with timestamp differs');
-
+my $list = getEmailAdrDB($con,$cfg->{'table'},'1 Day');
+is($list->[0],'test@example.com','fetching email list');
 is(delHBDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),'','deleting HB from DB');
+ok(closeConnection($con),'close HB mysql connection');
 
+#testing alert methods
+$xml_str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<alert version=\"0.1-dev\">
+	<authkey category=\"Monitoring\">0123456789a</authkey>
+	<date>Thu Oct 11 04:54:34 2012</date>
+	<host>
+		<name>tktest-host</name>
+		<ip>192.168.1.1</ip>
+		<operating-system>Ubuntu 12.04.1 LTS</operating-system>
+		<server-serial>1000088121</server-serial>
+	</host>
+	<service>
+		<name>IPMI</name>
+		<status>OK</status>
+		<plugin-output>IPMI Status: OK
+System Temp = 29.00 (Status: Nominal)
+Peripheral Temp = 38.00 (Status: Nominal)
+CPU Temp = 'Low' (Status: Nominal)
+FAN 1 = 1725.00 (Status: Nominal)
+Vcore = 0.74 (Status: Nominal)
+3.3VCC = 3.36 (Status: Nominal)
+12V = 11.93 (Status: Nominal)
+VDIMM = 1.53 (Status: Nominal)
+5VCC = 5.09 (Status: Nominal)
+-12V = -12.09 (Status: Nominal)
+VBAT = 3.12 (Status: Nominal)
+VSB = 3.34 (Status: Nominal)
+AVCC = 3.38 (Status: Nominal)
+Chassis Intru = 'OK' (Status: Nominal)
+PS Status = 'Presence detected' (Status: Nominal)</plugin-output>
+		<perfdata>'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38</perfdata>
+		<duration>1.196 seconds</duration>
+		<component-serial />
+		<component-name />
+	</service>
+</alert>";
+$hb_h = parseXmlText($xml_str);
+my $alert = Alert::Handler::Alert->new(
+	xmlRoot => $hb_h,
+	tkmonActive => 0
+);
+$cfg = readMysqlCfg('../mysql/MysqlConfig.cfg','alerts');
+is($cfg->{'host'}, '192.168.56.101');
+is($cfg->{'db'}, 'tk_monitoring');
+is($cfg->{'table'}, 'Alerts');
+is($cfg->{'user'}, 'root');
+$con = getConnection($cfg);
+ok($con,'mysql connection');
 
-ok(closeConnection($con),'close mysql connection');
+is(ALIsDuplicate($con,$cfg->{'table'},$alert),0,'AL not in DB');
+is(insertAL($con,$cfg->{'table'},'test2@example.com',$alert),'','inserting AL to DB');
+my ($fetchedDate,$fetchedStatus) = getALValsDB($con,$cfg->{'table'},$alert);
+is($fetchedDate,strToMysqlTime('Thu Oct 11 04:54:34 2012'),'fetching AL date');
+is($fetchedStatus,'OK','fetching AL status');
+is(ALIsDuplicate($con,$cfg->{'table'},$alert),-1,'AL duplicate with same timestamp');
+#set a new date
+$alert->date('Sat Oct 13 10:54:34 2012');
+is(ALIsDuplicate($con,$cfg->{'table'},$alert),1,'AL with timestamp differs');
+is(updateALDate($con,$cfg->{'table'},$alert),'','Updating AL date');
+is(ALIsDuplicate($con,$cfg->{'table'},$alert),-1,'AL duplicate with same timestamp');
+($fetchedDate,$fetchedStatus) = getALValsDB($con,$cfg->{'table'},$alert);
+is($fetchedDate,strToMysqlTime('Sat Oct 13 10:54:34 2012'),'fetching AL date');
+#set a new service status
+$alert->srvcStatus('Warning');
+my $ret;
+($ret,$fetchedStatus) = ALIsDuplicate($con,$cfg->{'table'},$alert); 
+is($ret,2,'AL with service status differs');
+is(updateALStatus($con,$cfg->{'table'},$alert),'','Updating AL status');
+is(ALIsDuplicate($con,$cfg->{'table'},$alert),-1,'AL duplicate with same timestamp');
+($fetchedDate,$fetchedStatus) = getALValsDB($con,$cfg->{'table'},$alert);
+is($fetchedDate,strToMysqlTime('Sat Oct 13 10:54:34 2012'),'fetching AL date');
+is($fetchedStatus,'Warning','fetching AL status');
+$list = getEmailAdrDB($con,$cfg->{'table'},'1 Day');
+is($list->[0],'test2@example.com','fetching email list');
+
+is(delALDB($con,$cfg->{'table'},$alert),'','deleting AL from DB');
+ok(closeConnection($con),'close AL mysql connection');

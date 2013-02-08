@@ -558,6 +558,14 @@ Parameters:
 	-The HB version
 	-The HB authkey
 
+=head2 delHBDB
+
+Example:
+
+	delHBDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey());
+	
+Deletes a heartbeat from the database.
+
 =head2 getHBDate
 
 	print getHBDate($DBCon,$mysqlCfg->{'table'},"0.1-dev","0123456789a");

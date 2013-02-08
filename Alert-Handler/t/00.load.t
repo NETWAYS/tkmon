@@ -1,7 +1,8 @@
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 BEGIN {
 use_ok( 'Alert::Handler' );
+use_ok( 'Alert::Handler::Alert' );
 use_ok( 'Alert::Handler::Heartbeat' );
 use_ok( 'Alert::Handler::Crypto' );
 use_ok( 'Alert::Handler::Xml' );
