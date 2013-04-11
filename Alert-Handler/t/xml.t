@@ -37,15 +37,15 @@ $xml_str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 	<authkey category=\"Monitoring\">0123456789a</authkey>
 	<date>Thu Oct 11 04:54:34 2012</date>
 	<host>
-		<name>tktest-host</name>
-		<ip>192.168.1.1</ip>
-		<operating-system>Ubuntu 12.04.1 LTS</operating-system>
-		<server-serial>9000088123</server-serial>
+		<name><![CDATA[tktest-host]]></name>
+		<ip><![CDATA[192.168.1.1]]></ip>
+		<operating-system><![CDATA[Ubuntu 12.04.1 LTS]]></operating-system>
+		<server-serial><![CDATA[9000088123]]></server-serial>
 	</host>
 	<service>
-		<name>IPMI</name>
-		<status>OK</status>
-		<plugin-output>IPMI Status: OK
+		<name><![CDATA[IPMI]]></name>
+		<status><![CDATA[OK]]></status>
+		<plugin-output><![CDATA[IPMI Status: OK
 System Temp = 29.00 (Status: Nominal)
 Peripheral Temp = 38.00 (Status: Nominal)
 CPU Temp = 'Low' (Status: Nominal)
@@ -60,9 +60,9 @@ VBAT = 3.12 (Status: Nominal)
 VSB = 3.34 (Status: Nominal)
 AVCC = 3.38 (Status: Nominal)
 Chassis Intru = 'OK' (Status: Nominal)
-PS Status = 'Presence detected' (Status: Nominal)</plugin-output>
-		<perfdata>'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38</perfdata>
-		<duration>1.196 seconds</duration>
+PS Status = 'Presence detected' (Status: Nominal)]]></plugin-output>
+		<perfdata><![CDATA['System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38]]></perfdata>
+		<duration><![CDATA[1.196 seconds]]>	</duration>
 		<component-serial />
 		<component-name />
 	</service>
