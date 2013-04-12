@@ -7,12 +7,13 @@ use version;
 use DateTime::Format::Strptime;
 use DateTime::Format::MySQL;
 
+
 our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
 BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
-	@EXPORT = qw(strToDateTime DateTimeToMysql strToMysqlTime DateTimeToStr mysqlToDateTime); # symbols to export
+	@EXPORT = qw(strToDateTime DateTimeToMysql strToMysqlTime DateTimeToStr mysqlToDateTime trimText); # symbols to export
 }
 
 sub strToDateTime{
@@ -67,6 +68,12 @@ sub mysqlToDateTime{
 	return $strp->parse_datetime($dateStr);
 }
 
+sub trimText{
+	my $toTrim = shift;
+	$toTrim =~ s/^\s+//;
+	$toTrim =~ s/\s+$//;
+	return $toTrim;
+}
 
 1; # Magic true value required at end of module
 __END__
@@ -135,6 +142,14 @@ Example:
 	my $dt = mysqlToDateTime($str);
 	
 Returns a Date::Time object from the given mysql DATETIME string.
+
+=head2 trimText
+
+Example:
+
+	$my $str = trimText($str);
+
+Trims leading/trailing newlines and spaces.
 
 =head1 DIAGNOSTICS
 
