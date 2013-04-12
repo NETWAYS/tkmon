@@ -134,12 +134,16 @@ sub handleAL{
 	if($checkAuth eq '200'){
 		$self->alert()->tkmonActive(1);
 	}	
-	if($checkAuth eq '402'){
+	elsif($checkAuth eq '402'){
 		$self->logger()->info("Payment required for ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
 		$self->alert()->tkmonActive(0);
 	}
-	if($checkAuth eq '403'){
+	elsif($checkAuth eq '403'){
 		$self->logger()->emergency("Not a valid auth/serial combi: ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
+		return;
+	}
+	else{
+		$self->logger()->emergency("Unhandled REST return code: ".$checkAuth." for ".$self->sender().', '.$alert->authkey().', '.$alert->srvSerial());
 		return;
 	}
 	my ($mysqlCfg,$DBCon) = $self->initMysql('alerts');
