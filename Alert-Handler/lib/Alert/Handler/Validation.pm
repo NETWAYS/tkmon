@@ -22,21 +22,22 @@ sub valAuthKey{
 	my $serial = shift;
 	
 	my $curl = WWW::Curl::Easy->new;
-	#$curl->setopt(CURLOPT_VERBOSE,1);
+	$curl->setopt(CURLOPT_VERBOSE,1);
 	
 	#use a different URL for serial combinations
 	if($serial){
 		$curl->setopt(CURLOPT_URL,$SER_REST_URL.$serial);
+		$curl->setopt(CURLOPT_CUSTOMREQUEST, 'GET');
 	}
 	else{
 		$curl->setopt(CURLOPT_URL,$HB_REST_URL);
+		$curl->setopt(CURLOPT_CUSTOMREQUEST, 'PUT');
 	}
 	
 	#put in the aut key with an empty password
 	$curl->setopt(CURLOPT_USERPWD,"$authKey:''");
 	my @headers = ('Content-Length: 0');
 	$curl->setopt(CURLOPT_HTTPHEADER, \@headers);
-	$curl->setopt(CURLOPT_CUSTOMREQUEST, 'PUT');
 	#$curl->setopt(CURLOPT_SSL_VERIFYPEER, 0);
 	#$curl->setopt(CURLOPT_SSL_VERIFYHOST, 0);
 	
