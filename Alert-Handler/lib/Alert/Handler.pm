@@ -111,7 +111,7 @@ sub handleHB{
 	}
 	#HB not in DB
 	if($ret == 0){
-		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),
+		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),$heartbeat->contactName(),
 			$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
 		$self->logger()->info("Inserted new HB in DB: ".$heartbeat->authkey());
 	}

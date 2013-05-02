@@ -73,6 +73,7 @@ sub insertHB{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $HBSender = shift;
+	my $HBContact = shift;
 	my $HBVersion = shift;
 	my $HBAuthkey = shift;
 	my $HBDate = shift;
@@ -86,11 +87,11 @@ sub insertHB{
 		}
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
-			(Sender_Email, Version, Authkey, Date)
-			VALUES (?, ?, ?, ?)" )
+			(Sender_Email, Contact_Name, Version, Authkey, Date)
+			VALUES (?, ?, ?, ?, ?)" )
 			or confess "Couldn't prepare statement: " . $DB->errstr;
 	
-	my $rv = $sth->execute($HBSender,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate))
+	my $rv = $sth->execute($HBSender,$HBContact,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate))
 	or confess "Couldn't execute statement: " . $sth->errstr;
 	
 	if($rv != 1){
