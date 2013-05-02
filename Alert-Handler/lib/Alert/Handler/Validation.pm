@@ -22,7 +22,7 @@ sub valAuthKey{
 	my $serial = shift;
 	
 	my $curl = WWW::Curl::Easy->new;
-	$curl->setopt(CURLOPT_VERBOSE,1);
+	#$curl->setopt(CURLOPT_VERBOSE,1);
 	
 	#use a different URL for serial combinations
 	if($serial){
