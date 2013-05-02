@@ -26,6 +26,9 @@ sub _init{
 	my $self = shift;
 	my $xml_h = $self->xmlRoot();
 	$self->version($xml_h->{heartbeat}->{version}->{value});
+	$self->contactName($xml_h->{heartbeat}->{'contact-name'}->{value});
+	use Data::Dumper;
+	print Dumper($xml_h);
 	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
 	$self->date($xml_h->{heartbeat}->{date}->{value});
 	$self->_check();
@@ -34,6 +37,7 @@ sub _init{
 sub _check{
 	my $self = shift;
 	if(!defined($self->version()) ||
+		!defined($self->contactName()) ||
 		!defined($self->authkey()) ||
 		!defined($self->date())){
 			confess("Non valid heartbeat XML detected.");
@@ -42,6 +46,7 @@ sub _check{
 }
 
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
+sub contactName { $_[0]->{contactName} = $_[1] if defined $_[1]; $_[0]->{contactName} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
 sub date { $_[0]->{date} = $_[1] if defined $_[1]; $_[0]->{date} }
@@ -101,6 +106,10 @@ Checks if all object attributes are defined and therefor the xml is valid
 =head2 xmlRoot
 
 Get the xml root respectively the xml hash
+
+=head2 contactName
+
+The contact name to the mail address of the alert sender.
 
 =head2 version
 

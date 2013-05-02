@@ -29,6 +29,7 @@ sub _init{
 	$self->version($xml_h->{alert}->{version}->{value});
 	$self->authkey($xml_h->{alert}->{authkey}->{value});
 	$self->date($xml_h->{alert}->{date}->{value});
+	$self->contactName($xml_h->{alert}->{'contact-name'}->{value});
 	$self->hostName($xml_h->{alert}->{host}->{name}->{value});
 	$self->hostIP($xml_h->{alert}->{host}->{ip}->{value});
 	$self->hostOS($xml_h->{alert}->{host}->{'operating-system'}->{value});
@@ -71,6 +72,7 @@ sub check{
 	if(!defined($self->version()) ||
 		!defined($self->authkey()) ||
 		!defined($self->date()) ||
+		!defined($self->contactName()) ||
 		!defined($self->hostName()) ||
 		!defined($self->hostIP()) ||
 		!defined($self->hostOS()) ||
@@ -88,6 +90,7 @@ sub check{
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
 sub alertHash { $_[0]->{alertHash} = $_[1] if defined $_[1]; $_[0]->{alertHash} }
 sub tkmonActive { $_[0]->{tkmonActive} = $_[1] if defined $_[1]; $_[0]->{tkmonActive} }
+sub contactName { $_[0]->{contactName} = $_[1] if defined $_[1]; $_[0]->{contactName} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
 sub date { $_[0]->{date} = $_[1] if defined $_[1]; $_[0]->{date} }
@@ -204,6 +207,10 @@ Get the calculated unique alert hash value (srvSerial + srvcName + hostName).
 States if the TKmonitoring service is active, means that the customer has
 baught the monitoing feature. The flag is initialized by the return values
 of the REST API calls, as there the service active state is checked.
+
+=head2 contactName
+
+The contact name to the mail address of the alert sender.
 
 =head2 version
 
