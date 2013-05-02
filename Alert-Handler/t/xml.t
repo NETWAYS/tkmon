@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 25;
+use Test::More tests => 28;
 
 use Alert::Handler::Xml;
 use Alert::Handler::Heartbeat;
@@ -9,6 +9,7 @@ use Alert::Handler::Alert;
 my $xml_str = '<?xml version="1.0" encoding="UTF-8"?>
 <heartbeat version="0.1-dev">
 	<authkey category="Monitoring">0123456789a</authkey>
+	<contact-name>Jean</contact-name>
 	<date>Thu Oct 11 04:54:34 2012</date>
 </heartbeat>';
 
@@ -16,9 +17,11 @@ my $hb_h = parseXmlFile('../examples/HeartbeatTest.xml');
 my $heartbeat = Alert::Handler::Heartbeat->new(
 	xmlRoot => $hb_h
 );
+use Data::Dumper;
 is(getXmlType($hb_h), 'heartbeat','xml type heartbeat');
 is($heartbeat->version(), '0.1-dev','heartbeat version');
-is($heartbeat->date(), 'Mon Dec 17 10:19:34 2012','heartbeat date');
+is($heartbeat->contactName(), 'Jean','hearbeat contact name');
+is($heartbeat->date(), 'Thu Oct 11 04:54:34 2012','heartbeat date');
 is($heartbeat->authkey(),'0123456789a','heartbeat auth key value');
 
 undef $hb_h;
@@ -29,6 +32,7 @@ $heartbeat = Alert::Handler::Heartbeat->new(
 );
 is(getXmlType($hb_h), 'heartbeat','xml type heartbeat');
 is($heartbeat->version(), '0.1-dev','heartbeat version');
+is($heartbeat->contactName(), 'Jean','hearbeat contact name');
 is($heartbeat->date(), 'Thu Oct 11 04:54:34 2012','heartbeat date');
 is($heartbeat->authkey(),'0123456789a','heartbeat auth key value');
 
@@ -36,6 +40,7 @@ $xml_str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <alert version=\"0.1-dev\">
 	<authkey category=\"Monitoring\">0123456789a</authkey>
 	<date>Thu Oct 11 04:54:34 2012</date>
+	<contact-name>Jean</contact-name>
 	<host>
 		<name><![CDATA[tktest-host]]></name>
 		<ip><![CDATA[192.168.1.1]]></ip>
@@ -75,6 +80,7 @@ my $alert = Alert::Handler::Alert->new(
 is(getXmlType($hb_h), 'alert','xml type alert');
 is($alert->version(), '0.1-dev','alert version');
 is($alert->date(), 'Thu Oct 11 04:54:34 2012','alert date');
+is($alert->contactName(), 'Jean','alert contact name');
 is($alert->authkey(),'0123456789a','alert auth key value');
 is($alert->hostName(),'tktest-host','alert host name');
 is($alert->hostIP(),'192.168.1.1','alert host IP');

@@ -19,6 +19,7 @@ ok($con,'mysql connection');
 my $xml_str = '<?xml version="1.0" encoding="UTF-8"?>
 <heartbeat version="0.1-dev">
 	<authkey category="Monitoring">0123456789a</authkey>
+	<contact-name>Jean</contact-name>
 	<date>Thu Oct 11 04:54:34 2012</date>
 </heartbeat>';
 my $hb_h = parseXmlText($xml_str);
@@ -28,7 +29,7 @@ my $heartbeat = Alert::Handler::Heartbeat->new(
 
 is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey(),
 	$heartbeat->date()),0,'HB not in DB');
-is(insertHB($con,$cfg->{'table'},'test@example.com',$heartbeat->version(),
+is(insertHB($con,$cfg->{'table'},'test@example.com',$heartbeat->contactName(),$heartbeat->version(),
 	$heartbeat->authkey(),$heartbeat->date()),'','inseting HB to DB');
 is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	strToMysqlTime('Thu Oct 11 04:54:34 2012'),'fetching HB Date');
@@ -50,16 +51,17 @@ $xml_str = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
 <alert version=\"0.1-dev\">
 	<authkey category=\"Monitoring\">0123456789a</authkey>
 	<date>Thu Oct 11 04:54:34 2012</date>
+	<contact-name>Jean</contact-name>
 	<host>
-		<name>tktest-host</name>
-		<ip>192.168.1.1</ip>
-		<operating-system>Ubuntu 12.04.1 LTS</operating-system>
-		<server-serial>1000088121</server-serial>
+		<name><![CDATA[tktest-host]]></name>
+		<ip><![CDATA[192.168.1.1]]></ip>
+		<operating-system><![CDATA[Ubuntu 12.04.1 LTS]]></operating-system>
+		<server-serial><![CDATA[9000088123]]></server-serial>
 	</host>
 	<service>
-		<name>IPMI</name>
-		<status>OK</status>
-		<plugin-output>IPMI Status: OK
+		<name><![CDATA[IPMI]]></name>
+		<status><![CDATA[OK]]></status>
+		<plugin-output><![CDATA[IPMI Status: OK
 System Temp = 29.00 (Status: Nominal)
 Peripheral Temp = 38.00 (Status: Nominal)
 CPU Temp = 'Low' (Status: Nominal)
@@ -74,9 +76,9 @@ VBAT = 3.12 (Status: Nominal)
 VSB = 3.34 (Status: Nominal)
 AVCC = 3.38 (Status: Nominal)
 Chassis Intru = 'OK' (Status: Nominal)
-PS Status = 'Presence detected' (Status: Nominal)</plugin-output>
-		<perfdata>'System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38</perfdata>
-		<duration>1.196 seconds</duration>
+PS Status = 'Presence detected' (Status: Nominal)]]></plugin-output>
+		<perfdata><![CDATA['System Temp'=29.00 'Peripheral Temp'=38.00 'FAN 1'=1725.00 'Vcore'=0.74 '3.3VCC'=3.36 '12V'=11.93 'VDIMM'=1.53 '5VCC'=5.09 '-12V'=-12.09 'VBAT'=3.12 'VSB'=3.34 'AVCC'=3.38]]></perfdata>
+		<duration><![CDATA[1.196 seconds]]>	</duration>
 		<component-serial />
 		<component-name />
 	</service>
