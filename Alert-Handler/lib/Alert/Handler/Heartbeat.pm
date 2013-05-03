@@ -49,7 +49,7 @@ sub _check{
 
 sub _genIDStr{
 	my $self = shift;
-	my $id = $self->contactName().'-'.$self->date();
+	my $id = $self->contactName()."\n".$self->date();
 	$self->ID_str($id);
 }
 

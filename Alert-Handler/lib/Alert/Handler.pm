@@ -213,8 +213,8 @@ sub genHBMail{
 	my $self = shift;
 	#cf genALMail
 	$self->msg_plain(duplicateEmail($self->msg));
-	replaceBody($self->msg_plain,$self->xml);
-	my $subject = "Correct Heartbeat from: ".$self->heartbeat()->ID_str();
+	replaceBody($self->msg_plain,$self->alert()->ID_str());
+	my $subject = "TKmon Setup OK";
 	replaceSubject($self->msg_plain,$subject);
 }
 
