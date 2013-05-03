@@ -102,6 +102,7 @@ sub handleHB{
 	#TODO Should this also be possible if auth key is not valid?
 	if(getSubject($self->msg()) eq "Icinga Testheartbeat"){
 		$self->genHBMail();
+		$self->logger()->info("Found Testheartbeat request: ".$heartbeat->authkey());
 		return;
 	}
 	

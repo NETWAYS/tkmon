@@ -99,6 +99,7 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 				smtp => 'zimbra.thomas-krenn.com'
 			};
 			sendEmail($mailToSend);
+			$tkLogger->info("Sent Email to: ".$tkHandler->sender());
 		} catch{
 			$tkLogger->emergency("Failed to send mail with: ".$_);
 			$tkLogger->emergency("Email ".$fname." to ".$tkHandler->sender()." has not been sent.");
