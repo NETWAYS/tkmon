@@ -31,7 +31,9 @@ sub _init{
 	print Dumper($xml_h);
 	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
 	$self->date($xml_h->{heartbeat}->{date}->{value});
+	#check values an generate an ID string
 	$self->_check();
+	$self->_genIDStr();
 }
 
 sub _check{
@@ -45,11 +47,18 @@ sub _check{
 	return;
 }
 
+sub _genIDStr{
+	my $self = shift;
+	my $id = $self->contactName().'-'.$self->date();
+	$self->ID_str($id);
+}
+
 sub xmlRoot { $_[0]->{xmlRoot} = $_[1] if defined $_[1]; $_[0]->{xmlRoot} }
 sub contactName { $_[0]->{contactName} = $_[1] if defined $_[1]; $_[0]->{contactName} }
 sub version { $_[0]->{version} = $_[1] if defined $_[1]; $_[0]->{version} }
 sub authkey { $_[0]->{authkey} = $_[1] if defined $_[1]; $_[0]->{authkey} }
 sub date { $_[0]->{date} = $_[1] if defined $_[1]; $_[0]->{date} }
+sub ID_str { $_[0]->{ID_str} = $_[1] if defined $_[1]; $_[0]->{ID_str} }
 
 
 1; # Magic true value required at end of module

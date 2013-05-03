@@ -83,6 +83,28 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 		$tkLogger->info("Email from: ".$tkHandler->sender()." has been discarded.");
 		exit(1);
 	};
+	#check if mail has been generated
+	if(defined($tkHandler->msg_plain())){
+		#save the plaintext mail
+		saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender());
+		#try to send an answer back to the sender
+		try{
+			my $msg = $tkHandler->msg_plain()->getBody();
+			my $recv = $tkHandler->sender();
+			my $mailToSend = {
+				from => 'monitor@thomas-krenn.com',
+				to => $recv,
+				msg => $msg,
+				subject => $tkHandler->msg_plain()->getSubject(),
+				smtp => 'zimbra.thomas-krenn.com'
+			};
+			sendEmail($mailToSend);
+		} catch{
+			$tkLogger->emergency("Failed to send mail with: ".$_);
+			$tkLogger->emergency("Email ".$fname." to ".$tkHandler->sender()." has not been sent.");
+			exit(1);
+		};
+	}
 }
 if($tkHandler->xmlType() eq 'alert'){
 	try{
@@ -96,7 +118,7 @@ if($tkHandler->xmlType() eq 'alert'){
 	#check if mail has been generated
 	if(defined($tkHandler->msg_plain())){
 		#save the plaintext mail
-		saveMail(toString($tkHandler->msg_plain()),$ARGV[0]);
+		saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender());
 		try{
 			sendMail(toString($tkHandler->msg_plain()));
 		} catch{
@@ -105,15 +127,14 @@ if($tkHandler->xmlType() eq 'alert'){
 			exit(1);
 		};
 	}
-	#remove mail from spool
-	try{
-		delMail($fname);
-	} catch{
-		$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
-		exit(1);
-	};
 }
-
+#remove mail from spool
+try{
+	delMail($fname);
+} catch{
+	$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
+	exit(1);
+};
 
 sub saveMail{
 	my $mail_str = shift;

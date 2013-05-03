@@ -98,6 +98,14 @@ sub handleHB{
 		$self->logger()->info("Auth key not valid: ".$self->sender().', '.$heartbeat->authkey());
 		return;
 	}
+	#check if it is a test heartbeat
+	#TODO Should this also be possible if auth key is not valid?
+	if($self->msg()->getSubject() eq "Icinga Testheartbeat"){
+		$self->genHBMail();
+		return;
+	}
+	
+	#prepare for HB database interactions
 	my ($mysqlCfg,$DBCon) = $self->initMysql('heartbeats');
 	my $ret;
 	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
@@ -173,7 +181,6 @@ sub handleAL{
 	if($ret == 0){
 		insertAL($DBCon,$mysqlCfg->{'table'},$self->sender(),$alert);
 		$self->logger()->info("Inserted new AL in DB: ".$self->sender().', '.$alert->authkey());
-		#TODO Check if email must be sent, if yes call genALMail
 		$self->genALMail();
 	}
 	if($ret == -1){
@@ -200,6 +207,16 @@ sub genALMail{
 	}
 	replaceSubject($self->msg_plain,$subject);
 }
+
+sub genHBMail{
+	my $self = shift;
+	#cf genALMail
+	$self->msg_plain(duplicateEmail($self->msg));
+	replaceBody($self->msg_plain,$self->xml);
+	my $subject = "Correct Heartbeat from: ".$self->heartbeat()->ID_str();
+	replaceSubject($self->msg_plain,$subject);
+}
+
 
 
 1; # Magic true value required at end of module
