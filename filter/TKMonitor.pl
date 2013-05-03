@@ -89,13 +89,13 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 		saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender());
 		#try to send an answer back to the sender
 		try{
-			my $msg = $tkHandler->msg_plain()->getBody();
+			my $msg = getBody($tkHandler->msg_plain());
 			my $recv = $tkHandler->sender();
 			my $mailToSend = {
 				from => 'monitor@thomas-krenn.com',
 				to => $recv,
 				msg => $msg,
-				subject => $tkHandler->msg_plain()->getSubject(),
+				subject => getSubject($tkHandler->msg_plain()),
 				smtp => 'zimbra.thomas-krenn.com'
 			};
 			sendEmail($mailToSend);

@@ -100,7 +100,7 @@ sub handleHB{
 	}
 	#check if it is a test heartbeat
 	#TODO Should this also be possible if auth key is not valid?
-	if($self->msg()->getSubject() eq "Icinga Testheartbeat"){
+	if(getSubject($self->msg()) eq "Icinga Testheartbeat"){
 		$self->genHBMail();
 		return;
 	}
