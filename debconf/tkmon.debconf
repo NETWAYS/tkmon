@@ -1,0 +1,12 @@
+# Icinga web administration password:
+icinga-cgi      icinga/adminpassword    password        relation
+icinga-cgi      icinga/adminpassword-repeat     password        relation
+# Apache servers to configure for icinga:
+icinga-cgi      icinga/httpd    multiselect     apache2
+# Use external commands with Icinga?
+icinga-common   icinga/check_external_commands  boolean true
+#use dbc for tkmon:
+tkmon   tkmon/dbconfig-install  boolean true
+#configure postfix:
+postfix postfix/main_mailer_type        select  Internet Site
+postfix postfix/mailname        string  tkmon-server.thomas-krenn.com
