@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 41;
+use Test::More tests => 47;
 
 use Alert::Handler::Dbase;
 use Alert::Handler::Xml;
@@ -27,26 +27,41 @@ my $heartbeat = Alert::Handler::Heartbeat->new(
 	xmlRoot => $hb_h
 );
 
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),0,'HB not in DB');
+is(HBIsDuplicate($con,$cfg->{'table'},'test@example.com',$heartbeat),0,'HB not in DB');
 is(insertHB($con,$cfg->{'table'},'test@example.com',$heartbeat),'','inserting HB to DB');
 is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	strToMysqlTime('Thu Oct 11 04:54:34 2012'),'fetching HB Date');
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),-1,'HB duplicate with same timestamp');
+is(HBIsDuplicate($con,$cfg->{'table'},'test@example.com',$heartbeat),-1,'HB duplicate with same timestamp');
 $heartbeat->date('Fri Oct 12 04:54:34 2012');
 is(updateHBDate($con,$cfg->{'table'},$heartbeat),'','updating HB date');
 is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	strToMysqlTime('Fri Oct 12 04:54:34 2012'),'fetching modified HB Date');
+
 $heartbeat->date('Thu Oct 11 04:54:34 2012');
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),1,'HB with timestamp differs');
+is(HBIsDuplicate($con,$cfg->{'table'},'test@example.com',$heartbeat),1,'HB with timestamp differs');
 is(getHBContactDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	'Jean','fetching HB contact');
 $heartbeat->contactName('Jean Luc');
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),2,'HB with timestamp and contact differs');
+is(HBIsDuplicate($con,$cfg->{'table'},'test@example.com',$heartbeat),2,'HB with timestamp and contact differs');
 is(updateHBDateContact($con,$cfg->{'table'},$heartbeat),'','updating HB date and contact');
 is(getHBContactDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	'Jean Luc','fetching modified HB contact');
+
+$heartbeat->date('Fri Oct 12 04:54:34 2012');
+is(getHBSenderDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	'test@example.com','fetching HB sender');
+is(HBIsDuplicate($con,$cfg->{'table'},'test2@example.com',$heartbeat),3,'HB with timestamp, contact and sender differs');
+$heartbeat->contactName('Jean Luc Picard');
+is(updateHBDateSenderContact($con,$cfg->{'table'},'test2@example.com',$heartbeat),'','updating HB date, contact and sender');	
+is(getHBSenderDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	'test2@example.com','fetching modified HB sender');
+is(getHBContactDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	'Jean Luc Picard','fetching modified HB contact');	
+is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	strToMysqlTime('Fri Oct 12 04:54:34 2012'),'fetching modified HB Date');
+	
 my $list = getEmailAdrDB($con,$cfg->{'table'},'1 Day');
-is($list->[0],'test@example.com','fetching email list');
+is($list->[0],'test2@example.com','fetching email list');
 is(delHBDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),'','deleting HB from DB');
 ok(closeConnection($con),'close HB mysql connection');
 

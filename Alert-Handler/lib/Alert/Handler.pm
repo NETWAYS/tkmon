@@ -109,7 +109,7 @@ sub handleHB{
 	#prepare for HB database interactions
 	my ($mysqlCfg,$DBCon) = $self->initMysql('heartbeats');
 	my $ret;
-	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},$heartbeat);
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},$self->sender(),$heartbeat);
 	#found a duplicate
 	if($ret == 1){
 		updateHBDate($DBCon,$mysqlCfg->{'table'},$heartbeat);
@@ -118,6 +118,10 @@ sub handleHB{
 	if($ret == 2){
 		updateHBDateContact($DBCon,$mysqlCfg->{'table'},$heartbeat);
 		$self->logger()->info("Found HB duplicate, updating contact info: ".$heartbeat->authkey());
+	}
+	if($ret == 3){
+		updateHBDateSenderContact($DBCon,$mysqlCfg->{'table'},$self->sender(),$heartbeat);
+		$self->logger()->info("Found HB duplicate, updating contact and sender info: ".$heartbeat->authkey());
 	}
 	#HB not in DB
 	if($ret == 0){

@@ -17,7 +17,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate updateHBDateContact getHBDateDB getHBContactDB delHBDB insertAL 
+	updateHBDate updateHBDateContact updateHBDateSenderContact getHBDateDB getHBContactDB getHBSenderDB delHBDB insertAL 
 	ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus delDupsDB getEmailAdrDB);
 	# symbols to export
 }
@@ -126,6 +126,7 @@ sub insertAL{
 sub HBIsDuplicate{
 	my $DB = shift;
 	my $DBTable = shift;
+	my $HBSender = shift;
 	my $hb = shift;
 	
 	checkDB($DB,$DBTable);
@@ -140,7 +141,12 @@ sub HBIsDuplicate{
 	}
 	#HB is in table, timestamp differs from given
 	if($fetchedDate ne strToMysqlTime($hb->date())){
-		#check if the contact differs also
+		#check if the sender differs 
+		my $fetchedSender = getHBSenderDB($DB,$DBTable,$hb->version(),$hb->authkey());
+		if(defined($fetchedSender) && ($HBSender ne $fetchedSender)){
+			return 3;
+		}
+		#check if the contact differs 
 		my $fetchedContact = getHBContactDB($DB,$DBTable,$hb->version(),$hb->authkey());
 		if(defined($fetchedContact) && ($hb->contactName() ne $fetchedContact)){
 			return 2;
@@ -192,6 +198,30 @@ sub updateHBDateContact{
 			or confess "Couldn't prepare statement: " . $DB->errstr;
 			
 	my $rv = $sth->execute(strToMysqlTime($hb->date()),$hb->contactName(),$hb->version(),$hb->authkey())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
+	if($rv != 1){
+		confess "Affected rows for updating HB Date and Contact returned wrong count.";
+	}
+}
+
+sub updateHBDateSenderContact{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBSender = shift;
+	my $hb = shift;
+	
+	checkDB($DB,$DBTable);
+	
+	$hb->check();
+	my $sth = $DB->prepare( "
+			UPDATE $DBTable
+			SET Date = ?, Contact_Name = ?, Sender_Email = ?
+			WHERE Version = ?
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
+	my $rv = $sth->execute(strToMysqlTime($hb->date()),$hb->contactName(),$HBSender,$hb->version(),$hb->authkey())
 	or confess "Couldn't execute statement: " . $sth->errstr;
 	
 	if($rv != 1){
@@ -283,6 +313,38 @@ sub getHBContactDB{
 	$rv = $sth->bind_columns(\$fetchedContact);
 	$sth->fetch;
 	return $fetchedContact;
+}
+
+sub getHBSenderDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+
+	checkDB($DB,$DBTable);
+	
+	my $sth = $DB->prepare( "
+			SELECT Sender_Email
+			FROM $DBTable
+			WHERE Version = ?
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($HBVersion,$HBAuthkey)
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
+	#the heartbeat is not in the table yet
+	if($sth->rows == 0){
+		return undef;
+	}
+	#more than 1 HB - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		confess "Already a duplicate HB in DB.";
+	}
+	my $fetchedSender;
+	$rv = $sth->bind_columns(\$fetchedSender);
+	$sth->fetch;
+	return $fetchedSender;
 }
 
 sub ALIsDuplicate{
