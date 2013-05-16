@@ -16,7 +16,7 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB delHBDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
+	updateHBDate getHBDateDB getHBContactDB delHBDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
 	delDupsDB getEmailAdrDB); # symbols to export
 }
 
@@ -235,6 +235,38 @@ sub getHBDateDB{
 	$rv = $sth->bind_columns(\$fetchedDate);
 	$sth->fetch;
 	return $fetchedDate;
+}
+
+sub getHBContactDB{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $HBVersion = shift;
+	my $HBAuthkey = shift;
+
+	checkDB($DB,$DBTable);
+	
+	my $sth = $DB->prepare( "
+			SELECT Contact_Name
+			FROM $DBTable
+			WHERE Version = ?
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+	
+	my $rv = $sth->execute($HBVersion,$HBAuthkey)
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
+	#the heartbeat is not in the table yet
+	if($sth->rows == 0){
+		return undef;
+	}
+	#more than 1 HB - duplicate checking has not worked correctly 
+	if($sth->rows != 1){
+		confess "Already a duplicate HB in DB.";
+	}
+	my $fetchedContact;
+	$rv = $sth->bind_columns(\$fetchedContact);
+	$sth->fetch;
+	return $fetchedContact;
 }
 
 sub ALIsDuplicate{
