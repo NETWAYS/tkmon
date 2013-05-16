@@ -32,11 +32,11 @@ sub _init{
 	$self->authkey($xml_h->{heartbeat}->{authkey}->{value});
 	$self->date($xml_h->{heartbeat}->{date}->{value});
 	#check values an generate an ID string
-	$self->_check();
+	$self->check();
 	$self->_genIDStr();
 }
 
-sub _check{
+sub check{
 	my $self = shift;
 	if(!defined($self->version()) ||
 		!defined($self->contactName()) ||
@@ -108,7 +108,7 @@ Inits the object attributes with the values from the xml root.
 As the xml root is has reference all the values from it must
 be assigned seperately to the heartbeat attributes.
 
-=head2 _check
+=head2 check
 
 Checks if all object attributes are defined and therefor the xml is valid
 

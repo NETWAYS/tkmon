@@ -9,6 +9,7 @@ use version;
 
 use Alert::Handler::Converters;
 use Alert::Handler::Alert;
+use Alert::Handler::Heartbeat;
 
 our $VERSION = qv('0.0.1');
 our (@ISA, @EXPORT);
@@ -16,8 +17,9 @@ BEGIN {
 	require Exporter;
 	@ISA = qw(Exporter);
 	@EXPORT = qw(readMysqlCfg closeConnection getConnection insertHB HBIsDuplicate 
-	updateHBDate getHBDateDB getHBContactDB delHBDB insertAL ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus
-	delDupsDB getEmailAdrDB); # symbols to export
+	updateHBDate updateHBDateContact getHBDateDB getHBContactDB delHBDB insertAL 
+	ALIsDuplicate getALValsDB updateALDate delALDB updateALStatus delDupsDB getEmailAdrDB);
+	# symbols to export
 }
 
 sub readMysqlCfg{
@@ -73,25 +75,18 @@ sub insertHB{
 	my $DB = shift;
 	my $DBTable = shift;
 	my $HBSender = shift;
-	my $HBContact = shift;
-	my $HBVersion = shift;
-	my $HBAuthkey = shift;
-	my $HBDate = shift;
+	my $hb = shift;
 	
 	checkDB($DB,$DBTable);
 
-	if(!defined($HBVersion) ||
-		!defined($HBAuthkey) ||
-		!defined($HBDate)){
-			confess "Cannot insert empty HB values to database.";
-		}
+	$hb->check();
 	my $sth = $DB->prepare( "
 			Insert INTO $DBTable
 			(Sender_Email, Contact_Name, Version, Authkey, Date)
 			VALUES (?, ?, ?, ?, ?)" )
 			or confess "Couldn't prepare statement: " . $DB->errstr;
 	
-	my $rv = $sth->execute($HBSender,$HBContact,$HBVersion,$HBAuthkey,strToMysqlTime($HBDate))
+	my $rv = $sth->execute($HBSender,$hb->contactName(),$hb->version(),$hb->authkey(),strToMysqlTime($hb->date()))
 	or confess "Couldn't execute statement: " . $sth->errstr;
 	
 	if($rv != 1){
@@ -131,30 +126,29 @@ sub insertAL{
 sub HBIsDuplicate{
 	my $DB = shift;
 	my $DBTable = shift;
-	my $HBVersion = shift;
-	my $HBAuthkey = shift;
-	my $HBDate = shift;
+	my $hb = shift;
 	
 	checkDB($DB,$DBTable);
 	
-	if(!defined($HBVersion) ||
-		!defined($HBAuthkey) ||
-		!defined($HBDate)){
-			confess "Cannot select empty HB values from database.";
-		}
+	$hb->check();
 	#now check if date differs
-	my $fetchedDate = getHBDateDB($DB,$DBTable,$HBVersion,$HBAuthkey);
+	my $fetchedDate = getHBDateDB($DB,$DBTable,$hb->version(),$hb->authkey());
 
 	#HB is not in table yet
 	if(!defined($fetchedDate)){
 		return 0;
 	}
 	#HB is in table, timestamp differs from given
-	if($fetchedDate ne strToMysqlTime($HBDate)){
+	if($fetchedDate ne strToMysqlTime($hb->date())){
+		#check if the contact differs also
+		my $fetchedContact = getHBContactDB($DB,$DBTable,$hb->version(),$hb->authkey());
+		if(defined($fetchedContact) && ($hb->contactName() ne $fetchedContact)){
+			return 2;
+		}
 		return 1;
 	}
 	#HB is in table, with same timestamp, this should rather be rare
-	if($fetchedDate eq strToMysqlTime($HBDate)){
+	if($fetchedDate eq strToMysqlTime($hb->date())){
 		return -1;
 	}
 }
@@ -162,12 +156,11 @@ sub HBIsDuplicate{
 sub updateHBDate{
 	my $DB = shift;
 	my $DBTable = shift;
-	my $newDate = shift;
-	my $HBVersion = shift;
-	my $HBAuthkey = shift;
+	my $hb = shift;
 	
 	checkDB($DB,$DBTable);
 	
+	$hb->check();
 	my $sth = $DB->prepare( "
 			UPDATE $DBTable
 			SET Date = ?
@@ -175,11 +168,34 @@ sub updateHBDate{
 			AND Authkey = ?" )
 			or confess "Couldn't prepare statement: " . $DB->errstr;
 			
-	my $rv = $sth->execute(strToMysqlTime($newDate),$HBVersion,$HBAuthkey)
+	my $rv = $sth->execute(strToMysqlTime($hb->date()),$hb->version(),$hb->authkey())
 	or confess "Couldn't execute statement: " . $sth->errstr;
 	
 	if($rv != 1){
 		confess "Affected rows for updating HB Date returned wrong count.";
+	}
+}
+
+sub updateHBDateContact{
+	my $DB = shift;
+	my $DBTable = shift;
+	my $hb = shift;
+	
+	checkDB($DB,$DBTable);
+	
+	$hb->check();
+	my $sth = $DB->prepare( "
+			UPDATE $DBTable
+			SET Date = ?, Contact_Name = ?
+			WHERE Version = ?
+			AND Authkey = ?" )
+			or confess "Couldn't prepare statement: " . $DB->errstr;
+			
+	my $rv = $sth->execute(strToMysqlTime($hb->date()),$hb->contactName(),$hb->version(),$hb->authkey())
+	or confess "Couldn't execute statement: " . $sth->errstr;
+	
+	if($rv != 1){
+		confess "Affected rows for updating HB Date and Contact returned wrong count.";
 	}
 }
 

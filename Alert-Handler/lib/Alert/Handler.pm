@@ -109,19 +109,19 @@ sub handleHB{
 	#prepare for HB database interactions
 	my ($mysqlCfg,$DBCon) = $self->initMysql('heartbeats');
 	my $ret;
-	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},
-		$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
+	$ret = HBIsDuplicate($DBCon,$mysqlCfg->{'table'},$heartbeat);
 	#found a duplicate
 	if($ret == 1){
-		updateHBDate($DBCon,$mysqlCfg->{'table'},
-			$heartbeat->date(),
-			$heartbeat->version(),$heartbeat->authkey());
+		updateHBDate($DBCon,$mysqlCfg->{'table'},$heartbeat);
 		$self->logger()->info("Found HB duplicate: ".$heartbeat->authkey());
+	}
+	if($ret == 2){
+		updateHBDateContact($DBCon,$mysqlCfg->{'table'},$heartbeat);
+		$self->logger()->info("Found HB duplicate, updating contact info: ".$heartbeat->authkey());
 	}
 	#HB not in DB
 	if($ret == 0){
-		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),$heartbeat->contactName(),
-			$heartbeat->version(),$heartbeat->authkey(),$heartbeat->date());
+		insertHB($DBCon,$mysqlCfg->{'table'},$self->sender(),$heartbeat);
 		$self->logger()->info("Inserted new HB in DB: ".$heartbeat->authkey());
 	}
 	if($ret == -1){

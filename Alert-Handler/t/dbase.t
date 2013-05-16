@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-use Test::More tests => 37;
+use Test::More tests => 41;
 
 use Alert::Handler::Dbase;
 use Alert::Handler::Xml;
@@ -27,20 +27,24 @@ my $heartbeat = Alert::Handler::Heartbeat->new(
 	xmlRoot => $hb_h
 );
 
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey(),
-	$heartbeat->date()),0,'HB not in DB');
-is(insertHB($con,$cfg->{'table'},'test@example.com',$heartbeat->contactName(),$heartbeat->version(),
-	$heartbeat->authkey(),$heartbeat->date()),'','inseting HB to DB');
+is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),0,'HB not in DB');
+is(insertHB($con,$cfg->{'table'},'test@example.com',$heartbeat),'','inserting HB to DB');
 is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	strToMysqlTime('Thu Oct 11 04:54:34 2012'),'fetching HB Date');
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey(),
-	$heartbeat->date()),-1,'HB duplicate with same timestamp');
-is(updateHBDate($con,$cfg->{'table'},'Fri Oct 12 04:54:34 2012',
-	$heartbeat->version(),$heartbeat->authkey()),'','updating HB date');
+is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),-1,'HB duplicate with same timestamp');
+$heartbeat->date('Fri Oct 12 04:54:34 2012');
+is(updateHBDate($con,$cfg->{'table'},$heartbeat),'','updating HB date');
 is(getHBDateDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
 	strToMysqlTime('Fri Oct 12 04:54:34 2012'),'fetching modified HB Date');
-is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey(),
-	$heartbeat->date()),1,'HB with timestamp differs');
+$heartbeat->date('Thu Oct 11 04:54:34 2012');
+is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),1,'HB with timestamp differs');
+is(getHBContactDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	'Jean','fetching HB contact');
+$heartbeat->contactName('Jean Luc');
+is(HBIsDuplicate($con,$cfg->{'table'},$heartbeat),2,'HB with timestamp and contact differs');
+is(updateHBDateContact($con,$cfg->{'table'},$heartbeat),'','updating HB date and contact');
+is(getHBContactDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),
+	'Jean Luc','fetching modified HB contact');
 my $list = getEmailAdrDB($con,$cfg->{'table'},'1 Day');
 is($list->[0],'test@example.com','fetching email list');
 is(delHBDB($con,$cfg->{'table'},$heartbeat->version(),$heartbeat->authkey()),'','deleting HB from DB');
