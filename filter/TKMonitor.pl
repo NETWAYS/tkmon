@@ -29,6 +29,8 @@ while(<STDIN>){
 }
 
 #backup mail, keep filename to remove it at the end
+#plaintext mail
+my $fnamePT;
 my $fname = try{
 	saveMail($msg_str,$ARGV[0]);
 } catch{
@@ -48,7 +50,6 @@ try{
 	$tkHandler->parseMsgStr();
 	$tkHandler->decryptXml();
 } catch{
-	#TODO Remove backup mail in spool?
 	$tkLogger->emergency("Failed to parse mail and decrypt XML with: ".$_);
 	exit(1);
 };
@@ -86,7 +87,11 @@ if($tkHandler->xmlType() eq 'heartbeat'){
 	#check if mail has been generated
 	if(defined($tkHandler->msg_plain())){
 		#save the plaintext mail
-		saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender());
+		$fnamePT = try{
+			saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender(),$fname);
+		} catch{
+			$tkLogger->emergency("Failed to save PT mail with: ".$_);
+		}
 		#try to send an answer back to the sender
 		try{
 			my $msg = getBody($tkHandler->msg_plain());
@@ -119,7 +124,11 @@ if($tkHandler->xmlType() eq 'alert'){
 	#check if mail has been generated
 	if(defined($tkHandler->msg_plain())){
 		#save the plaintext mail
-		saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender());
+		$fnamePT = try{
+			saveMail(toString($tkHandler->msg_plain()),$tkHandler->sender(),$fname);
+		} catch{
+			$tkLogger->emergency("Failed to save PT mail with: ".$_);
+		}
 		try{
 			sendMail(toString($tkHandler->msg_plain()));
 		} catch{
@@ -131,7 +140,12 @@ if($tkHandler->xmlType() eq 'alert'){
 }
 #remove mail from spool
 try{
-	delMail($fname);
+	if(defined($fname)){
+		delMail($fname);
+	}
+	if(defined($fnamePT)){
+		delMail($fnamePT);
+	}
 } catch{
 	$tkLogger->emergency("Failed to delete mail from spool with: ".$_);
 	exit(1);
@@ -140,9 +154,19 @@ try{
 sub saveMail{
 	my $mail_str = shift;
 	my $sender = shift;
-	my $time_str = scalar(localtime);
-	$time_str =~ s/\s/\_/g;
-	my $fname = $MAILDIR.'/'.$sender.'-'.$time_str;
+	my $fname = shift;
+	
+	#the first time of saving the filename is built
+	if(!defined($fname)){
+		my $time_str = scalar(localtime);
+		$time_str =~ s/\s/\_/g;
+		$fname = $MAILDIR.'/'.$sender.'-'.$time_str;
+	}
+	else{
+		#the other time it is a plaintext mail
+		$fname .= '-pt';
+	}
+	
 	my $fh = new IO::File "> $fname";
 	if(defined $fh){
 		print $fh $mail_str;
